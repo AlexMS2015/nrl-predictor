@@ -7,7 +7,6 @@ from bs4 import BeautifulSoup
 import sys
 
 sys.path.append("..")
-import ENVIRONMENT_VARIABLES as EV
 import requests
 import json
 from bs4 import BeautifulSoup
@@ -55,7 +54,7 @@ def get_nrl_data(round=1, year=2024, competition = '111'):
             }
             matches_json.append(match)
 
-    round_data = {
-        f"{round}": matches_json
-    }
-    return round_data
+    # round_data = {
+    #     f"{round}": matches_json
+    # }
+    return matches_json

@@ -1,0 +1,25 @@
+[project]
+name = "nrl-predictor"
+version = "0.1.0"
+description = "N/A"
+authors = [
+    {name = "Your Name",email = "you@example.com"}
+]
+license = {text = "N/A"}
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "beautifulsoup4 (>=4.13.4,<5.0.0)",
+    "pandas (>=2.3.0,<3.0.0)",
+    "chromedriver-autoinstaller (>=0.6.4,<0.7.0)",
+    "selenium (>=4.33.0,<5.0.0)",
+    "google-cloud-storage (>=3.1.1,<4.0.0)",
+    "pydantic (>=2.11.7,<3.0.0)",
+    "pyyaml (>=6.0.2,<7.0.0)",
+    "python-dotenv (>=1.1.0,<2.0.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
