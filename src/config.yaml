@@ -1,6 +1,6 @@
-gcs_bucket:
-  dev: nrl-data-dev
-  prod: nrl-data-prod
+# gcs_bucket:
+#   dev: nrl-data-dev
+#   prod: nrl-data-prod
 
 teams:
   - Broncos
@@ -171,7 +171,7 @@ knockon_teams:
   - Bears
   - Magpies
 
-competition:
+competition_codes:
   nrl: '111'
   nrlw: '161'
   knockon: '113'

@@ -8,8 +8,7 @@ for automated web scraping tasks related to Scalping.
 import chromedriver_autoinstaller
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
-
-chromedriver_autoinstaller.install()
+import os
 
 
 def set_up_driver():
@@ -19,12 +18,22 @@ def set_up_driver():
     
     :return: WebDriver object for Chrome
     """
+    in_docker = os.getenv("RUNNING_IN_DOCKER", "false").lower() == "true"
+
     options = Options()
-    # Ignore annoying messages from the NRL website 
+
+    if not in_docker:
+        # Automatically install the Chrome driver if not already installed
+        chromedriver_autoinstaller.install()
+
+    if in_docker:
+        options.add_argument('--no-sandbox')
+        options.add_argument('--disable-dev-shm-usage')
+        options.add_argument('--disable-gpu')
+
+    # Ignore annoying messages from the NRL website
     options.add_argument('--ignore-certificate-errors')
-    
-    # Run Selenium in headless mode
-    options.add_argument('--headless')
+    options.add_argument('--headless=new')
     options.add_argument('log-level=3')
     
     # Exclude logging to assist with errors caused by NRL website 

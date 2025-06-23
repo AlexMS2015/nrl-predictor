@@ -9,26 +9,39 @@ from dotenv import load_dotenv
 from config import config as conf
 from scraping.utilities.get_nrl_data import get_nrl_data
 from utilities.gcs_client import GCSClient
+from scraping.utilities.set_up_driver import set_up_driver
+from urllib.parse import urlparse, parse_qs
+import time
 
-load_dotenv() # for local development. env is injected in production.
 
-competition = os.getenv("TARGET_COMPETITION", "nrl")
-min_year = int(os.getenv("MIN_YEAR", 2001))
-max_year = int(os.getenv("MAX_YEAR", 2024))
-max_round = int(os.getenv("MAX_ROUND", 33))
-env = os.getenv("ENV", "dev")
-gcs_bucket = conf.gcs_bucket[env]
-gcs_client = GCSClient(bucket_name=gcs_bucket)
+def get_final_url(url):
+    driver = set_up_driver()
+    driver.get(url)
+    time.sleep(3)
+    return driver.current_url
 
-for year in range(min_year, max_year + 1):
-    for round_num in range(1, max_round + 1):
+
+def parse_url(url, params):
+    parsed_url = urlparse(url)
+    query_params = parse_qs(parsed_url.query)
+    return {
+        'competition_code': query_params['competition'][0],
+        'latest_round': int(query_params['round'][0]) - 1,
+        'year': int(query_params['season'][0])
+    }
+
+
+# should be split into 3 functions and the looping in __main__
+def main(competition_code, year, round_num, gcs_bucket):
+    # for year in range(min_year, max_year + 1):
+    #     for round_num in range(1, max_round + 1):
         try:
-            competition_code = conf.competition[competition]
+            competition = conf.comp_code_to_name(competition_code)
         except (TypeError, KeyError):
-            print(f"Unknown Competition Type: {competition}")
+            print(f"Unknown Competition Code: {competition_code}")
 
         print(f"Fetching data for {competition} {year}, {round_num}...")
-
+        
         match_json = get_nrl_data(round_num, year, competition_code)
 
         script_dir = Path(__file__).parent
@@ -44,7 +57,27 @@ for year in range(min_year, max_year + 1):
         except Exception as e:
             print(f"Error writing file: {e}")
 
+        gcs_client = GCSClient(bucket_name=gcs_bucket)
         gcs_client.upload_to_gcs(
             src_file=str(file_path),
             dest_blob=f"{competition}/match_data/{file_name}"
         )
+
+
+if __name__ == "__main__":
+    load_dotenv('gcp.env')
+    env = os.getenv("ENV", "dev")
+    if env == 'dev':
+        gcs_bucket = os.getenv("DEV_BUCKET")
+    else:
+        gcs_bucket = os.getenv("PROD_BUCKET")
+
+    next_round_url = get_final_url('https://www.nrl.com/draw/')
+    parsed_data = parse_url(next_round_url)
+
+    main(
+        competition_code=parsed_data['competition_code'],
+        year=parsed_data['year'],
+        round_num=parsed_data['latest_round'],
+        gcs_bucket=gcs_bucket
+    )

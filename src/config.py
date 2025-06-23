@@ -2,9 +2,7 @@ from pydantic import BaseModel
 import yaml
 import os
 
-class Config(BaseModel):
-    gcs_bucket: dict[str, str]
-    
+class Config(BaseModel):    
     teams: list[str]
 
     nrl_website: str
@@ -22,7 +20,11 @@ class Config(BaseModel):
     hostplus_teams: list[str]
     knockon_teams: list[str]
 
-    competition: dict[str, str]
+    competition_codes: dict[str, str]
+
+    def comp_code_to_name(self, competition_code):
+        codes_reversed = {v: k for k, v in self.competition_codes.items()}
+        return codes_reversed.get(competition_code, None)
 
 with open("config.yaml", "r") as file:
     config_data = yaml.safe_load(file)

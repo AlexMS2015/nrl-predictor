@@ -1,7 +1,23 @@
-PROJECT=$(gcloud config get-value project)
-BUCKET=nrl-data-dev
-REGION=australia-southeast1
-SVC_ACCT=nrl-data-ingest
-SVC_PRINCIPAL=${SVC_ACCT}@${PROJECT_ID}.iam.gserviceaccount.com
+source ../gcp.env
 
-# gcloud storage buckets create gs://$BUCKET --location $REGION
+gcloud iam service-accounts create $SVC_ACCT \
+    --description="Service account for NRL data ingestion" \
+    --display-name="NRL Data Ingest Service Account"
+
+gcloud storage buckets update gs://$DEV_BUCKET \
+    --uniform-bucket-level-access
+
+gcloud storage buckets add-iam-policy-binding gs://$DEV_BUCKET \
+    --member=serviceAccount:$SVC_EMAIL \
+    --role=roles/storage.admin
+
+gcloud storage buckets update gs://$PROD_BUCKET \
+    --uniform-bucket-level-access
+
+gcloud storage buckets add-iam-policy-binding gs://$PROD_BUCKET \
+    --member=serviceAccount:$SVC_EMAIL \
+    --role=roles/storage.admin
+
+gcloud iam service-accounts add-iam-policy-binding $SVC_EMAIL \
+  --member="user:$USERNAME" \
+  --role="roles/iam.serviceAccountUser"
