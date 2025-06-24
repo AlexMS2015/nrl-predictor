@@ -5,7 +5,7 @@ scraper-build-local:
 	docker build -f src/scraping/Dockerfile -t $(SCRAPER_IMAGE) .
 
 # for local testing in dev
-scraper-run-local: scraper-build-local
+scraper-run-local: # scraper-build-local
 	docker run --rm \
 			--env ENV=dev \
 			--name scraper-container \
