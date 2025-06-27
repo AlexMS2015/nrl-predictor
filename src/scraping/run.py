@@ -73,6 +73,7 @@ if __name__ == "__main__":
         gcs_bucket = os.getenv("PROD_BUCKET")
 
     next_round_url = get_final_url('https://www.nrl.com/draw/')
+    print(next_round_url)
     parsed_data = parse_url(next_round_url)
 
     main(
