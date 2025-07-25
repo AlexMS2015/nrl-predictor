@@ -1,14 +1,15 @@
-include src/gcp.env
+include gcp.env
 export
 
 scraper-build:
-	docker buildx build -f src/scraping/Dockerfile --platform linux/amd64 -t $(SCRAPER_IMAGE) .
+	docker buildx build -f ./scraper/Dockerfile --platform linux/amd64 -t $(SCRAPER_IMAGE) .
 
 scraper-run-local: scraper-build
 	docker run --rm \
 			--env ENV=dev \
 			--name scraper-container \
 			-v ~/.gcp/nrl-data-ingest-key.json:/secrets/nrl-data-ingest-key.json \
+			-v "$$(pwd):/app" \
 			-e GOOGLE_APPLICATION_CREDENTIALS=/secrets/nrl-data-ingest-key.json \
 			$(SCRAPER_IMAGE) 
 
@@ -30,5 +31,13 @@ scraper-deploy-prod: scraper-push
 		--region $(REGION) \
 		--service-account $(SVC_EMAIL) \
 		--set-env-vars ENV=prod
+
+scraper-schedule-dev:
+	gcloud scheduler jobs create http $(SCRAPER_SCHEDULE_NAME_DEV) \
+	--location $(REGION) \
+	--schedule="0 7 * 3-10 3" \
+	--uri="https://run.googleapis.com/v2/projects/$(PROJECT)/locations/$(REGION)/jobs/$(SCRAPER_JOB_DEV):run" \
+	--http-method POST \
+	--oauth-service-account-email $SVC_EMAIL
 
 # --dry-run -> can be passed to run.py to see what would be done without actually running it
