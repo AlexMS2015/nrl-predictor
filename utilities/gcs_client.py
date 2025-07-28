@@ -9,9 +9,9 @@ class GCSClient:
     """
 
     def __init__(self, bucket_name: str):
-        self.client = storage.Client(project='nrl-predictor-463403')
+        self.client = storage.Client(project="nrl-predictor-463403")
         self.bucket = self.client.bucket(bucket_name)
-        
+
     def upload_to_gcs(self, src_file: str, dest_blob: str) -> None:
         """Uploads a file to Google Cloud Storage."""
         blob = self.bucket.blob(dest_blob)

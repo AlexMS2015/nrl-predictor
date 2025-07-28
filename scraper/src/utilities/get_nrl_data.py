@@ -8,24 +8,20 @@ from loguru import logger
 import sys
 
 sys.path.append("..")
-import requests
 import json
-from bs4 import BeautifulSoup
 
 
-def get_nrl_data(round=1, year=2024, competition_code='111'):
+def get_nrl_data(round=1, year=2024, competition_code="111"):
     url = f"https://www.nrl.com/draw/?competition={competition_code}&round={round}&season={year}"
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
-    }
-    
+    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
+
     response = requests.get(url, headers=headers)
     if response.status_code != 200:
         logger.critical("Failed to fetch data")
         return None
 
     soup = BeautifulSoup(response.text, "html.parser")
-    
+
     # Find the JSON data within the HTML
     script_tag = soup.find("div", {"id": "vue-draw"})
     if not script_tag:
@@ -40,7 +36,7 @@ def get_nrl_data(round=1, year=2024, competition_code='111'):
     data = json.loads(raw_json)
 
     fixtures = data.get("fixtures", [])
-    
+
     matches_json = []
     for fixture in fixtures:
         if fixture["type"] == "Match":

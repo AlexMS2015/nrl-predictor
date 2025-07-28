@@ -15,7 +15,7 @@ def set_up_driver():
     """Set up the Chrome Web Driver for Scalping.
 
     This function sets up the Chrome Web Driver with specified options.
-    
+
     :return: WebDriver object for Chrome
     """
     in_docker = os.getenv("RUNNING_IN_DOCKER", "false").lower() == "true"
@@ -27,17 +27,17 @@ def set_up_driver():
         chromedriver_autoinstaller.install()
 
     if in_docker:
-        options.add_argument('--no-sandbox')
-        options.add_argument('--disable-dev-shm-usage')
-        options.add_argument('--disable-gpu')
+        options.add_argument("--no-sandbox")
+        options.add_argument("--disable-dev-shm-usage")
+        options.add_argument("--disable-gpu")
 
     # Ignore annoying messages from the NRL website
-    options.add_argument('--ignore-certificate-errors')
-    options.add_argument('--headless=new')
-    options.add_argument('log-level=3')
-    
-    # Exclude logging to assist with errors caused by NRL website 
-    options.add_experimental_option('excludeSwitches', ['enable-logging'])
-    
+    options.add_argument("--ignore-certificate-errors")
+    options.add_argument("--headless=new")
+    options.add_argument("log-level=3")
+
+    # Exclude logging to assist with errors caused by NRL website
+    options.add_experimental_option("excludeSwitches", ["enable-logging"])
+
     driver = webdriver.Chrome(options=options)
     return driver

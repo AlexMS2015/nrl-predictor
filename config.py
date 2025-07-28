@@ -1,11 +1,10 @@
-import os
 import sys
 import yaml
 from loguru import logger
 from pydantic import BaseModel
 
 
-class Config(BaseModel):    
+class Config(BaseModel):
     teams: list[str]
 
     nrl_website: str
@@ -29,9 +28,10 @@ class Config(BaseModel):
         codes_reversed = {v: k for k, v in self.competition_codes.items()}
         return codes_reversed.get(competition_code, None)
 
+
 with open("config.yaml", "r") as file:
     config_data = yaml.safe_load(file)
-    
+
 config = Config(**config_data)
 
 logger.remove()
