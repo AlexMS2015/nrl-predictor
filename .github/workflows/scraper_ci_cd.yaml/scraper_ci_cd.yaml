@@ -13,7 +13,7 @@ jobs:
   # test:
 
   deploy-dev:
-    if: github.ref_name != 'master'
+    if: github.ref_name != 'main'
     # needs: [overunder_claim_unit_tests, lint]
     runs-on: 'ubuntu-latest'
 
@@ -57,4 +57,4 @@ jobs:
           make scraper-schedule-dev
 
   deloy-prod:
-    if: github.ref_name == 'master'
+    if: github.ref_name == 'main'
