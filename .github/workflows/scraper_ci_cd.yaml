@@ -14,7 +14,7 @@ jobs:
 
   deploy-dev:
     if: github.ref_name != 'main'
-    # needs: [overunder_claim_unit_tests, lint]
+    # needs: [unit_tests, lint]
     runs-on: 'ubuntu-latest'
 
     permissions: # ?
@@ -24,6 +24,22 @@ jobs:
     steps:
       - name: 'Checkout'
         uses: 'actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332' # actions/checkout@v4
+
+      - name: Create gcp.env file
+        run: |
+          echo "USERNAME=${{ secrets.USERNAME }}" >> gcp.env
+          echo "PROJECT=${{ vars.PROJECT }}" >> gcp.env
+          echo "REGION=${{ vars.REGION }}" >> gcp.env
+          echo "SVC_ACCT=${{ vars.SVC_ACCT }}" >> gcp.env
+          echo "SVC_EMAIL=${{ secrets.SVC_EMAIL }}" >> gcp.env
+          echo "DOCKER_REPO=${{ vars.DOCKER_REPO }}" >> gcp.env
+          echo "DEV_BUCKET=${{ vars.DEV_BUCKET }}" >> gcp.env
+          echo "PROD_BUCKET=${{ vars.PROD_BUCKET }}" >> gcp.env
+          echo "SCRAPER_IMAGE=${{ vars.SCRAPER_IMAGE }}" >> gcp.env
+          echo "SCRAPER_JOB_DEV=${{ vars.SCRAPER_JOB_DEV }}" >> gcp.env
+          echo "SCRAPER_SCHEDULE_NAME_DEV=${{ vars.SCRAPER_SCHEDULE_NAME_DEV }}" >> gcp.env
+          echo "SCRAPER_JOB_PROD=${{ vars.SCRAPER_JOB_PROD }}" >> gcp.env
+          echo "SCRAPER_SCHEDULE_NAME_PROD=${{ vars.SCRAPER_SCHEDULE_NAME_PROD }}" >> gcp.env
 
       - name: Import .env file
         shell: bash
