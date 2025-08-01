@@ -11,7 +11,7 @@ scraper-run-local: scraper-build
 			-v ~/.gcp/nrl-data-ingest-key.json:/secrets/nrl-data-ingest-key.json \
 			-v "$$(pwd):/app" \
 			-e GOOGLE_APPLICATION_CREDENTIALS=/secrets/nrl-data-ingest-key.json \
-			$(SCRAPER_IMAGE) 
+			$(SCRAPER_IMAGE)
 
 SCRAPER_IMAGE_TAG=$(REGION)-docker.pkg.dev/$(PROJECT)/$(DOCKER_REPO)/$(SCRAPER_IMAGE):latest
 scraper-push: scraper-build
@@ -25,13 +25,6 @@ scraper-deploy-dev: scraper-push
 		--service-account $(SVC_EMAIL) \
 		--set-env-vars ENV=dev
 
-scraper-deploy-prod: scraper-push
-	gcloud run jobs deploy $(SCRAPER_JOB_PROD) \
-		--image $(SCRAPER_IMAGE_TAG) \
-		--region $(REGION) \
-		--service-account $(SVC_EMAIL) \
-		--set-env-vars ENV=prod
-
 scraper-schedule-dev:
 	gcloud scheduler jobs create http $(SCRAPER_SCHEDULE_NAME_DEV) \
 	--location $(REGION) \
@@ -39,5 +32,15 @@ scraper-schedule-dev:
 	--uri="https://run.googleapis.com/v2/projects/$(PROJECT)/locations/$(REGION)/jobs/$(SCRAPER_JOB_DEV):run" \
 	--http-method POST \
 	--oauth-service-account-email $SVC_EMAIL
+
+scraper-run-dev:
+	gcloud run jobs execute nrl-scraper-dev --wait --region $(REGION)
+
+scraper-deploy-prod: scraper-push
+	gcloud run jobs deploy $(SCRAPER_JOB_PROD) \
+		--image $(SCRAPER_IMAGE_TAG) \
+		--region $(REGION) \
+		--service-account $(SVC_EMAIL) \
+		--set-env-vars ENV=prod
 
 # --dry-run -> can be passed to run.py to see what would be done without actually running it
