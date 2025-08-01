@@ -56,5 +56,5 @@ jobs:
           make scraper-deploy-dev
           make scraper-schedule-dev
 
-  deloy-prod:
-    if: github.ref_name == 'main'
+  # deloy-prod:
+  #   if: github.ref_name == 'main'
