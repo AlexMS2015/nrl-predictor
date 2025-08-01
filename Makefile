@@ -22,6 +22,7 @@ scraper-deploy-dev: scraper-push
 	gcloud run jobs deploy $(SCRAPER_JOB_DEV) \
 		--image $(SCRAPER_IMAGE_TAG) \
 		--region $(REGION) \
+		--memory 4Gi
 		--service-account $(SVC_EMAIL) \
 		--set-env-vars ENV=dev
 
