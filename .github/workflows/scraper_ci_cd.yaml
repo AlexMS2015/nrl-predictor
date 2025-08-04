@@ -67,8 +67,8 @@ jobs:
 
       - name: 'Build and Push Container'
         run: |-
-          make scraper_build
-          make scraper_push
+          make scraper-build
+          make scraper-push
 
       - name: 'Deploy to Cloud Run'
         run: |-
