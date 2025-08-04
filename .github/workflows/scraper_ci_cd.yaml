@@ -9,6 +9,7 @@ on:
       - main
 
 jobs:
+  # Split into lint, test, build, deploy-dev, deploy-prod jobs?
   # lint:
   # test:
 
@@ -30,9 +31,13 @@ jobs:
           echo "USERNAME=${{ secrets.USERNAME }}" >> gcp.env
           echo "PROJECT=${{ vars.PROJECT }}" >> gcp.env
           echo "REGION=${{ vars.REGION }}" >> gcp.env
+
+          echo "DOCKER_REPO=${{ vars.DOCKER_REPO }}" >> gcp.env
           echo "SVC_ACCT=${{ vars.SVC_ACCT }}" >> gcp.env
           echo "SVC_EMAIL=${{ secrets.SVC_EMAIL }}" >> gcp.env
-          echo "DOCKER_REPO=${{ vars.DOCKER_REPO }}" >> gcp.env
+
+          echo "SCRAPER_SVC_ACCT=${{ vars.SCRAPER_SVC_ACCT }}" >> gcp.env
+          echo "SCRAPER_SVC_EMAIL=${{ secrets.SCRAPER_SVC_EMAIL }}" >> gcp.env
           echo "DEV_BUCKET=${{ vars.DEV_BUCKET }}" >> gcp.env
           echo "PROD_BUCKET=${{ vars.PROD_BUCKET }}" >> gcp.env
           echo "SCRAPER_IMAGE=${{ vars.SCRAPER_IMAGE }}" >> gcp.env
@@ -54,7 +59,7 @@ jobs:
         uses: 'google-github-actions/auth@f112390a2df9932162083945e46d439060d66ec2' # google-github-actions/auth@v2
         with:
           # credentials_json: '${{ github.workspace }}/key.json'
-          credentials_json: ${{ secrets.GCP_SA_KEY_B64 }}
+          credentials_json: ${{ secrets.SVC_KEY }}
 
       - name: 'Docker Auth'
         uses: 'docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567' # docker/login-action@v3
@@ -62,7 +67,7 @@ jobs:
           # username: 'oauth2accesstoken'
           # password: '${{ steps.auth.outputs.auth_token }}'
           username: _json_key
-          password: ${{ secrets.GCP_SA_KEY_B64 }}
+          password: ${{ secrets.SVC_KEY }}
           registry: '${{ env.REGION }}-docker.pkg.dev'
 
       - name: 'Build and Push Container'
