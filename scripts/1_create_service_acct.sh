@@ -8,11 +8,11 @@ gcloud iam service-accounts add-iam-policy-binding $SVC_EMAIL \
   --member="user:$USERNAME" \
   --role="roles/iam.serviceAccountUser"
 
-gcloud project add-iam-policy-binding $PROJECT \
-    --member=serviceAccount:$SVC_EMAIL
+gcloud projects add-iam-policy-binding $PROJECT \
+    --member=serviceAccount:$SVC_EMAIL \
     --role=roles/artifactregistry.writer
 
-gcloud project add-iam-policy-binding $PROJECT \
+gcloud projects add-iam-policy-binding $PROJECT \
     --member=serviceAccount:$SVC_EMAIL \
     --role=roles/run.admin
 
