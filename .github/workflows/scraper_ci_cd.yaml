@@ -80,5 +80,9 @@ jobs:
           make scraper-deploy-dev
           make scraper-schedule-dev
 
+      # integration test
+      - name: 'Run cloud run job'
+        run: make scraper-run-dev
+
   # deloy-prod:
   #   if: github.ref_name == 'main'
