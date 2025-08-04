@@ -4,14 +4,17 @@ export
 # should run this before any gcloud commands to simulate the GHA environment:
 # gcloud auth activate-service-account --key-file=$HOME/.gcp/nrl-deployer-key.json
 
-scraper-build:
+test:
+
+
+build:
 	docker buildx build -f ./scraper/Dockerfile --platform linux/amd64 -t $(SCRAPER_IMAGE) .
 
 # true run local outside of docker: WIP
 # 	export GOOGLE_APPLICATION_CREDENTIALS=/path/to/key.json
 # 	run.py
 
-scraper-run-local: scraper-build
+run-local: build
 	docker run --rm \
 			--env ENV=dev \
 			--name scraper-container \
@@ -21,11 +24,11 @@ scraper-run-local: scraper-build
 			$(SCRAPER_IMAGE)
 
 SCRAPER_IMAGE_TAG=$(REGION)-docker.pkg.dev/$(PROJECT)/$(DOCKER_REPO)/$(SCRAPER_IMAGE):latest
-scraper-push: scraper-build
+push: build
 	docker tag $(SCRAPER_IMAGE) $(SCRAPER_IMAGE_TAG)
 	docker push $(SCRAPER_IMAGE_TAG)
 
-scraper-deploy-dev: scraper-push
+deploy-dev: push
 	gcloud run jobs deploy $(SCRAPER_JOB_DEV) \
 		--image $(SCRAPER_IMAGE_TAG) \
 		--region $(REGION) \
@@ -33,7 +36,7 @@ scraper-deploy-dev: scraper-push
 		--service-account $(SCRAPER_SVC_EMAIL) \
 		--set-env-vars ENV=dev
 
-scraper-schedule-dev:
+schedule-dev:
 	gcloud scheduler jobs create http $(SCRAPER_SCHEDULE_NAME_DEV) \
 	--location $(REGION) \
 	--schedule="0 7 * 3-10 3" \
@@ -41,10 +44,10 @@ scraper-schedule-dev:
 	--http-method POST \
 	--oauth-service-account-email $(SVC_EMAIL)
 
-scraper-run-dev:
+run-dev:
 	gcloud run jobs execute nrl-scraper-dev --wait --region $(REGION)
 
-scraper-deploy-prod: scraper-push
+deploy-prod: push
 	gcloud run jobs deploy $(SCRAPER_JOB_PROD) \
 		--image $(SCRAPER_IMAGE_TAG) \
 		--region $(REGION) \

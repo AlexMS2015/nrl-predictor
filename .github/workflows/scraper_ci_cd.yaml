@@ -12,11 +12,24 @@ jobs:
   # Split into lint, test, build, deploy-dev, deploy-prod jobs?
   # lint:
   # test:
+    # defaults:
+    #   run:
+    #     working-directory: ./scraper
+    # - name: Run Unit Tests
+    #   working-directory: ./models/over_undersubscribed_predictor
+    #   run: |
+    #       make unit_test
+    #       coverage xml -i
+    #       cp -f coverage.xml coverage/
 
   deploy-dev:
     if: github.ref_name != 'main'
     # needs: [unit_tests, lint]
     runs-on: 'ubuntu-latest'
+
+    defaults:
+      run:
+        working-directory: ./scraper
 
     permissions: # ?
       contents: 'read' # ?

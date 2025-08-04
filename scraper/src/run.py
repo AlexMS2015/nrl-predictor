@@ -3,79 +3,26 @@ Script to run the data scraper for match and player data.
 """
 
 import os
-import json
-from pathlib import Path
 from loguru import logger
 from dotenv import load_dotenv
 from config import config as conf
-from scraper.src.utilities.get_nrl_data import get_nrl_data
 from utilities.gcs_client import GCSClient
+from scraper.src.utilities.scraper_functions import get_basic_match_data
 from scraper.src.utilities.set_up_driver import set_up_driver
-from urllib.parse import urlparse, parse_qs
-import time
-from selenium.webdriver.support.ui import WebDriverWait
+from scraper.src.utilities.utils import get_final_url, parse_url, save_locally
 
 
-@logger.catch
-def get_final_url(url, retries=3):
-    for i in range(retries):
-        try:
-            driver = set_up_driver()
-            driver.get(url)
-            WebDriverWait(driver, 10).until(
-                lambda d: d.execute_script("return document.readyState") == "complete"
-            )
-            return driver.current_url
-        except Exception as e:
-            logger.critical(f"Cannot obtain latest round URL | Retry: {i} | Error: {e}")
-            time.sleep(5)
-        finally:
-            driver.quit()
+def main(gcs_bucket):
+    driver = set_up_driver()
+    next_round_url = get_final_url(driver, "https://www.nrl.com/draw/")
+    logger.info(f"URL: {next_round_url}")
 
-
-# if __name__ == "__main__":
-#     test_url = "https://www.nrl.com/draw/"
-#     print(get_final_url(test_url))
-
-
-def parse_url(url):
-    parsed_url = urlparse(url)
-    query_params = parse_qs(parsed_url.query)
-    return {
-        "competition_code": query_params["competition"][0],
-        "latest_round": int(query_params["round"][0]) - 1,
-        "year": int(query_params["season"][0]),
-    }
-
-
-# should be split into 3 functions and the looping in __main__
-def main(competition_code, year, round_num, gcs_bucket):
-    # for year in range(min_year, max_year + 1):
-    #     for round_num in range(1, max_round + 1):
-    try:
-        competition = conf.comp_code_to_name(competition_code)
-    except (TypeError, KeyError):
-        logger.critical(f"Unknown Competition Code: {competition_code}")
-
+    competition_code, year, round_num = parse_url(next_round_url)
+    competition = conf.comp_code_to_name(competition_code)
     logger.info(f"Fetching data for {competition} {year}, {round_num}...")
 
-    match_json = get_nrl_data(round_num, year, competition_code)
-
-    script_dir = Path(__file__).parent
-    data_dir = script_dir / "../data" / competition / "match_data"
-    data_dir = data_dir.resolve()  # convert to absolute path
-    data_dir.mkdir(parents=True, exist_ok=True)
-
-    file_name = f"{year}_r{round_num}.json"
-    file_path = data_dir / file_name
-    try:
-        with open(file_path, "w", encoding="utf-8") as file:
-            json.dump(
-                match_json, file, ensure_ascii=False, indent=4
-            )  # , separators=(',', ':'))
-    except Exception as e:
-        logger.warning(f"Error writing file: {e}")
-
+    match_json = get_basic_match_data(round_num, year, competition_code)
+    file_path, file_name = save_locally(match_json, competition, year, round_num)
     gcs_client = GCSClient(bucket_name=gcs_bucket)
     gcs_client.upload_to_gcs(
         src_file=str(file_path), dest_blob=f"{competition}/match_data/{file_name}"
@@ -85,18 +32,6 @@ def main(competition_code, year, round_num, gcs_bucket):
 if __name__ == "__main__":
     load_dotenv("gcp.env")
     env = os.getenv("ENV", "dev")
-    if env == "dev":
-        gcs_bucket = os.getenv("DEV_BUCKET")
-    else:
+    gcs_bucket = os.getenv("DEV_BUCKET")
+    if env == "prod":
         gcs_bucket = os.getenv("PROD_BUCKET")
-
-    next_round_url = get_final_url("https://www.nrl.com/draw/")
-    logger.info(f"URL: {next_round_url}")
-    parsed_data = parse_url(next_round_url)
-
-    main(
-        competition_code=parsed_data["competition_code"],
-        year=parsed_data["year"],
-        round_num=parsed_data["latest_round"],
-        gcs_bucket=gcs_bucket,
-    )

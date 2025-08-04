@@ -11,7 +11,7 @@ sys.path.append("..")
 import json
 
 
-def get_nrl_data(round=1, year=2024, competition_code="111"):
+def get_basic_match_data(round=1, year=2024, competition_code="111"):
     url = f"https://www.nrl.com/draw/?competition={competition_code}&round={round}&season={year}"
     headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
 
