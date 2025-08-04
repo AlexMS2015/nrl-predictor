@@ -4,3 +4,6 @@ gcloud storage buckets create gs://$PROD_BUCKET --location $REGION
 
 gcloud storage buckets update gs://$DEV_BUCKET \
     --uniform-bucket-level-access
+
+gcloud storage buckets update gs://$PROD_BUCKET \
+    --uniform-bucket-level-access

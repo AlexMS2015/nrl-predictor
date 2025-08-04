@@ -9,12 +9,13 @@ on:
       - main
 
 jobs:
+  # Split into lint, test, build, deploy-dev, deploy-prod jobs?
   # lint:
   # test:
 
   deploy-dev:
     if: github.ref_name != 'main'
-    # needs: [overunder_claim_unit_tests, lint]
+    # needs: [unit_tests, lint]
     runs-on: 'ubuntu-latest'
 
     permissions: # ?
@@ -25,36 +26,62 @@ jobs:
       - name: 'Checkout'
         uses: 'actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332' # actions/checkout@v4
 
+      - name: Create gcp.env file
+        run: |
+          echo "USERNAME=${{ secrets.USERNAME }}" >> gcp.env
+          echo "PROJECT=${{ vars.PROJECT }}" >> gcp.env
+          echo "REGION=${{ vars.REGION }}" >> gcp.env
+
+          echo "DOCKER_REPO=${{ vars.DOCKER_REPO }}" >> gcp.env
+          echo "SVC_ACCT=${{ vars.SVC_ACCT }}" >> gcp.env
+          echo "SVC_EMAIL=${{ secrets.SVC_EMAIL }}" >> gcp.env
+
+          echo "SCRAPER_SVC_ACCT=${{ vars.SCRAPER_SVC_ACCT }}" >> gcp.env
+          echo "SCRAPER_SVC_EMAIL=${{ secrets.SCRAPER_SVC_EMAIL }}" >> gcp.env
+          echo "DEV_BUCKET=${{ vars.DEV_BUCKET }}" >> gcp.env
+          echo "PROD_BUCKET=${{ vars.PROD_BUCKET }}" >> gcp.env
+          echo "SCRAPER_IMAGE=${{ vars.SCRAPER_IMAGE }}" >> gcp.env
+          echo "SCRAPER_JOB_DEV=${{ vars.SCRAPER_JOB_DEV }}" >> gcp.env
+          echo "SCRAPER_SCHEDULE_NAME_DEV=${{ vars.SCRAPER_SCHEDULE_NAME_DEV }}" >> gcp.env
+          echo "SCRAPER_JOB_PROD=${{ vars.SCRAPER_JOB_PROD }}" >> gcp.env
+          echo "SCRAPER_SCHEDULE_NAME_PROD=${{ vars.SCRAPER_SCHEDULE_NAME_PROD }}" >> gcp.env
+
       - name: Import .env file
         shell: bash
         run: cat gcp.env >> ${GITHUB_ENV}
 
-      - name: Decode service account key
-        run: |
-          echo "${{ secrets.GCP_SA_KEY_B64 }}" | base64 --decode > ${{ github.workspace }}/key.json
+      # - name: Decode service account key
+      #   run: |
+      #     echo "${{ secrets.GCP_SA_KEY_B64 }}" | base64 --decode > ${{ github.workspace }}/key.json
 
       - name: Authenticate to GCP
         id: auth
         uses: 'google-github-actions/auth@f112390a2df9932162083945e46d439060d66ec2' # google-github-actions/auth@v2
         with:
-          credentials_json: '${{ github.workspace }}/key.json'
+          # credentials_json: '${{ github.workspace }}/key.json'
+          credentials_json: ${{ secrets.SVC_KEY }}
 
       - name: 'Docker Auth'
         uses: 'docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567' # docker/login-action@v3
         with:
-          username: 'oauth2accesstoken'
-          password: '${{ steps.auth.outputs.auth_token }}'
+          # username: 'oauth2accesstoken'
+          # password: '${{ steps.auth.outputs.auth_token }}'
+          username: _json_key
+          password: ${{ secrets.SVC_KEY }}
           registry: '${{ env.REGION }}-docker.pkg.dev'
 
       - name: 'Build and Push Container'
         run: |-
-          make scraper_build
-          make scraper_push
+          make scraper-build
+          make scraper-push
 
       - name: 'Deploy to Cloud Run'
         run: |-
           make scraper-deploy-dev
-          make scraper-schedule-dev
 
-  deloy-prod:
-    if: github.ref_name == 'main'
+      # integration test
+      - name: 'Run cloud run job'
+        run: make scraper-run-dev
+
+  # deloy-prod:
+  #   if: github.ref_name == 'main'
