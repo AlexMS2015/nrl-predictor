@@ -1,11 +1,15 @@
-include gcp.env
+include ../gcp.env
 export
 
 # should run this before any gcloud commands to simulate the GHA environment:
 # gcloud auth activate-service-account --key-file=$HOME/.gcp/nrl-deployer-key.json
 
-test:
+lint:
+	poetry run ruff check --fix
+	poetry run ruff format
 
+test:
+	PYTHONPATH=./ poetry run pytest
 
 build:
 	docker buildx build -f ./scraper/Dockerfile --platform linux/amd64 -t $(SCRAPER_IMAGE) .

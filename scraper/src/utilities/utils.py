@@ -3,6 +3,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from pathlib import Path
 from loguru import logger
 import json
+import time
 
 
 @logger.catch
@@ -25,9 +26,13 @@ def parse_url(url):
     parsed_url = urlparse(url)
     query_params = parse_qs(parsed_url.query)
 
-    competition_code = query_params["competition"][0]
-    year = int(query_params["season"][0])
-    round_num = int(query_params["round"][0]) - 1
+    try:
+        competition_code = query_params["competition"][0]
+        year = int(query_params["season"][0])
+        round_num = int(query_params["round"][0]) - 1
+    except (KeyError, IndexError, ValueError) as e:
+        logger.critical("Cannot extract comp, year, round:", e)
+        raise e
 
     return competition_code, year, round_num
 
