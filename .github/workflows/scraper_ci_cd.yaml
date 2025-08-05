@@ -84,10 +84,7 @@ jobs:
 
       - name: Run Unit Tests
         working-directory: ./scraper
-        run: |
-            make unit-test
-            coverage xml -i
-            cp -f coverage.xml coverage/
+        run: make unit-test
 
   build-deploy-dev:
     if: github.ref_name != 'main'
