@@ -60,7 +60,7 @@ schedule-dev:
 run-dev:
 	gcloud run jobs execute nrl-scraper-dev --wait --region $(REGION)
 
-deploy-prod: push
+deploy-prod:
 	gcloud run jobs deploy $(SCRAPER_JOB_PROD) \
 		--image $(SCRAPER_IMAGE_TAG) \
 		--region $(REGION) \
