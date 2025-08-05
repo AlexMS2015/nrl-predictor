@@ -8,7 +8,7 @@ lint:
 	poetry run ruff check --fix
 	poetry run ruff format
 
-test:
+unit-test:
 	poetry run pytest
 
 run-local: lint test
