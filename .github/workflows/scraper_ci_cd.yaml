@@ -3,32 +3,101 @@ name: 'Build and deploy scraper'
 on:
   pull_request:
     branches:
-      - main
+      - 'main'
+    paths:
+      - 'scraper/**'
   push:
     branches:
-      - main
+      - 'main'
+    paths:
+      - 'scraper/**'
 
 jobs:
-  # Split into lint, test, build, deploy-dev, deploy-prod jobs?
-  # lint:
-  # test:
-
-  deploy-dev:
-    if: github.ref_name != 'main'
-    # needs: [unit_tests, lint]
+  lint:
     runs-on: 'ubuntu-latest'
 
-    permissions: # ?
-      contents: 'read' # ?
-      id-token: 'write' # ?
-
     steps:
-      - name: 'Checkout'
-        uses: 'actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332' # actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Create gcp.env file
-        run: |
-          echo "USERNAME=${{ secrets.USERNAME }}" >> gcp.env
+        run: |-
+          touch gcp.env
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Setup Poetry
+        uses: abatilo/actions-poetry@v3
+        with:
+          poetry-version: 2.1.3
+
+      - name: Install packages
+        run: poetry install --only dev
+
+      - name: Lint
+        working-directory: ./scraper
+        run: make lint
+
+  test:
+    needs: [lint]
+    runs-on: 'ubuntu-latest'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Create gcp.env file
+        run: |-
+          echo "USERNAME=${{ secrets.USERNAME }}" > gcp.env
+          echo "PROJECT=${{ vars.PROJECT }}" >> gcp.env
+          echo "REGION=${{ vars.REGION }}" >> gcp.env
+
+          echo "DOCKER_REPO=${{ vars.DOCKER_REPO }}" >> gcp.env
+          echo "SVC_ACCT=${{ vars.SVC_ACCT }}" >> gcp.env
+          echo "SVC_EMAIL=${{ secrets.SVC_EMAIL }}" >> gcp.env
+
+          echo "SCRAPER_SVC_ACCT=${{ vars.SCRAPER_SVC_ACCT }}" >> gcp.env
+          echo "SCRAPER_SVC_EMAIL=${{ secrets.SCRAPER_SVC_EMAIL }}" >> gcp.env
+          echo "DEV_BUCKET=${{ vars.DEV_BUCKET }}" >> gcp.env
+          echo "PROD_BUCKET=${{ vars.PROD_BUCKET }}" >> gcp.env
+          echo "SCRAPER_IMAGE=${{ vars.SCRAPER_IMAGE }}" >> gcp.env
+          echo "SCRAPER_JOB_DEV=${{ vars.SCRAPER_JOB_DEV }}" >> gcp.env
+          echo "SCRAPER_SCHEDULE_NAME_DEV=${{ vars.SCRAPER_SCHEDULE_NAME_DEV }}" >> gcp.env
+          echo "SCRAPER_JOB_PROD=${{ vars.SCRAPER_JOB_PROD }}" >> gcp.env
+          echo "SCRAPER_SCHEDULE_NAME_PROD=${{ vars.SCRAPER_SCHEDULE_NAME_PROD }}" >> gcp.env
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Setup Poetry
+        uses: abatilo/actions-poetry@v3
+        with:
+          poetry-version: 2.1.3
+
+      - name: Install packages
+        run: poetry install
+
+      - name: Run Unit Tests
+        working-directory: ./scraper
+        run: make unit-test
+
+  build-deploy-dev:
+    if: github.ref_name != 'main'
+    needs: [lint, test]
+    runs-on: 'ubuntu-latest'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Create gcp.env file
+        run: |-
+          echo "USERNAME=${{ secrets.USERNAME }}" > gcp.env
           echo "PROJECT=${{ vars.PROJECT }}" >> gcp.env
           echo "REGION=${{ vars.REGION }}" >> gcp.env
 
@@ -50,38 +119,72 @@ jobs:
         shell: bash
         run: cat gcp.env >> ${GITHUB_ENV}
 
-      # - name: Decode service account key
-      #   run: |
-      #     echo "${{ secrets.GCP_SA_KEY_B64 }}" | base64 --decode > ${{ github.workspace }}/key.json
-
       - name: Authenticate to GCP
         id: auth
         uses: 'google-github-actions/auth@f112390a2df9932162083945e46d439060d66ec2' # google-github-actions/auth@v2
         with:
-          # credentials_json: '${{ github.workspace }}/key.json'
           credentials_json: ${{ secrets.SVC_KEY }}
 
       - name: 'Docker Auth'
         uses: 'docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567' # docker/login-action@v3
         with:
-          # username: 'oauth2accesstoken'
-          # password: '${{ steps.auth.outputs.auth_token }}'
           username: _json_key
           password: ${{ secrets.SVC_KEY }}
           registry: '${{ env.REGION }}-docker.pkg.dev'
 
       - name: 'Build and Push Container'
+        working-directory: ./scraper
         run: |-
-          make scraper-build
-          make scraper-push
+          make build
+          make push
 
       - name: 'Deploy to Cloud Run'
-        run: |-
-          make scraper-deploy-dev
+        working-directory: ./scraper
+        run: make deploy-dev
 
       # integration test
       - name: 'Run cloud run job'
-        run: make scraper-run-dev
+        working-directory: ./scraper
+        run: make run-dev
 
-  # deloy-prod:
-  #   if: github.ref_name == 'main'
+  deploy-prod:
+    if: github.ref_name == 'main'
+    runs-on: 'ubuntu-latest'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Create gcp.env file
+        run: |-
+          echo "USERNAME=${{ secrets.USERNAME }}" > gcp.env
+          echo "PROJECT=${{ vars.PROJECT }}" >> gcp.env
+          echo "REGION=${{ vars.REGION }}" >> gcp.env
+
+          echo "DOCKER_REPO=${{ vars.DOCKER_REPO }}" >> gcp.env
+          echo "SVC_ACCT=${{ vars.SVC_ACCT }}" >> gcp.env
+          echo "SVC_EMAIL=${{ secrets.SVC_EMAIL }}" >> gcp.env
+
+          echo "SCRAPER_SVC_ACCT=${{ vars.SCRAPER_SVC_ACCT }}" >> gcp.env
+          echo "SCRAPER_SVC_EMAIL=${{ secrets.SCRAPER_SVC_EMAIL }}" >> gcp.env
+          echo "DEV_BUCKET=${{ vars.DEV_BUCKET }}" >> gcp.env
+          echo "PROD_BUCKET=${{ vars.PROD_BUCKET }}" >> gcp.env
+          echo "SCRAPER_IMAGE=${{ vars.SCRAPER_IMAGE }}" >> gcp.env
+          echo "SCRAPER_JOB_DEV=${{ vars.SCRAPER_JOB_DEV }}" >> gcp.env
+          echo "SCRAPER_SCHEDULE_NAME_DEV=${{ vars.SCRAPER_SCHEDULE_NAME_DEV }}" >> gcp.env
+          echo "SCRAPER_JOB_PROD=${{ vars.SCRAPER_JOB_PROD }}" >> gcp.env
+          echo "SCRAPER_SCHEDULE_NAME_PROD=${{ vars.SCRAPER_SCHEDULE_NAME_PROD }}" >> gcp.env
+
+      - name: Authenticate to GCP
+        id: auth
+        uses: 'google-github-actions/auth@f112390a2df9932162083945e46d439060d66ec2' # google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.SVC_KEY }}
+
+      - name: 'Deploy to Cloud Run'
+        working-directory: ./scraper
+        run: make deploy-prod
+
+      # integration test
+      # - name: 'Run cloud run job'
+      #   run: make run-prod
