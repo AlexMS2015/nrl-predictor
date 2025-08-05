@@ -189,4 +189,5 @@ jobs:
 
       # integration test
       - name: 'Run cloud run job'
+        working-directory: ./scraper
         run: make run-prod

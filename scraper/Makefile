@@ -64,6 +64,7 @@ deploy-prod:
 	gcloud run jobs deploy $(SCRAPER_JOB_PROD) \
 		--image $(SCRAPER_IMAGE_TAG) \
 		--region $(REGION) \
+		--memory 4Gi
 		--service-account $(SCRAPER_SVC_EMAIL) \
 		--set-env-vars ENV=prod
 
