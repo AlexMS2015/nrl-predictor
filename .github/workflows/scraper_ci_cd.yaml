@@ -188,5 +188,5 @@ jobs:
         run: make deploy-prod
 
       # integration test
-      # - name: 'Run cloud run job'
-      #   run: make run-prod
+      - name: 'Run cloud run job'
+        run: make run-prod

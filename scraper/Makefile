@@ -37,11 +37,11 @@ gcloud-auth:
 	gcloud auth activate-service-account --key-file=$HOME/.gcp/nrl-deployer-key.json
 
 SCRAPER_IMAGE_TAG=$(REGION)-docker.pkg.dev/$(PROJECT)/$(DOCKER_REPO)/$(SCRAPER_IMAGE):latest
-push: build
+push:
 	docker tag $(SCRAPER_IMAGE) $(SCRAPER_IMAGE_TAG)
 	docker push $(SCRAPER_IMAGE_TAG)
 
-deploy-dev: push
+deploy-dev:
 	gcloud run jobs deploy $(SCRAPER_JOB_DEV) \
 		--image $(SCRAPER_IMAGE_TAG) \
 		--region $(REGION) \
