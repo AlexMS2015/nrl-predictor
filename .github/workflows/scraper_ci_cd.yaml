@@ -85,7 +85,7 @@ jobs:
       - name: Run Unit Tests
         working-directory: ./scraper
         run: |
-            make unit_test
+            make unit-test
             coverage xml -i
             cp -f coverage.xml coverage/
 
