@@ -135,17 +135,17 @@ jobs:
       - name: 'Build and Push Container'
         working-directory: ./scraper
         run: |-
-          make scraper-build
-          make scraper-push
+          make build
+          make push
 
       - name: 'Deploy to Cloud Run'
         working-directory: ./scraper
-        run: make scraper-deploy-dev
+        run: make deploy-dev
 
       # integration test
       - name: 'Run cloud run job'
         working-directory: ./scraper
-        run: make scraper-run-dev
+        run: make run-dev
 
   deploy-prod:
     if: github.ref_name == 'main'
@@ -183,8 +183,8 @@ jobs:
 
       - name: 'Deploy to Cloud Run'
         working-directory: ./scraper
-        run: make scraper-deploy-prod
+        run: make deploy-prod
 
       # integration test
       # - name: 'Run cloud run job'
-      #   run: make scraper-run-prod
+      #   run: make run-prod
