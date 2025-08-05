@@ -32,11 +32,12 @@ run-local-docker: build
 run-local-docker-it: build
 	docker run -it --rm --entrypoint /bin/bash $(SCRAPER_IMAGE)
 
+# run this locally before push and deploy to better simulate GHA environment
 gcloud-auth:
 	gcloud auth activate-service-account --key-file=$HOME/.gcp/nrl-deployer-key.json
 
 SCRAPER_IMAGE_TAG=$(REGION)-docker.pkg.dev/$(PROJECT)/$(DOCKER_REPO)/$(SCRAPER_IMAGE):latest
-push: build gcloud-auth
+push: build
 	docker tag $(SCRAPER_IMAGE) $(SCRAPER_IMAGE_TAG)
 	docker push $(SCRAPER_IMAGE_TAG)
 
@@ -65,5 +66,16 @@ deploy-prod: push
 		--region $(REGION) \
 		--service-account $(SCRAPER_SVC_EMAIL) \
 		--set-env-vars ENV=prod
+
+schedule-prod:
+	gcloud scheduler jobs create http $(SCRAPER_SCHEDULE_NAME_PROD) \
+	--location $(REGION) \
+	--schedule="0 7 * 3-10 3" \
+	--uri="https://run.googleapis.com/v2/projects/$(PROJECT)/locations/$(REGION)/jobs/$(SCRAPER_JOB_PROD):run" \
+	--http-method POST \
+	--oauth-service-account-email $(SVC_EMAIL)
+
+run-prod:
+	gcloud run jobs execute nrl-scraper-prod --wait --region $(REGION)
 
 # --dry-run -> can be passed to run.py to see what would be done without actually running it
