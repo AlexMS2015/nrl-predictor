@@ -12,6 +12,10 @@ import json
 
 
 def get_basic_match_data(round=1, year=2024, competition_code="111"):
+    logger.info(
+        f"Fetching data for comp={competition_code} year={year}, round={round}..."
+    )
+
     url = f"https://www.nrl.com/draw/?competition={competition_code}&round={round}&season={year}"
     headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
 

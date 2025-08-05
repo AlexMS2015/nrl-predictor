@@ -9,26 +9,34 @@ lint:
 	poetry run ruff format
 
 test:
-	PYTHONPATH=./ poetry run pytest
+	poetry run pytest
+
+run-local: lint test
+	poetry install
+	export GOOGLE_APPLICATION_CREDENTIALS=/path/to/key.json
+	poetry run python -m scraper.run
 
 build:
-	docker buildx build -f ./scraper/Dockerfile --platform linux/amd64 -t $(SCRAPER_IMAGE) .
+	docker buildx build -f ./Dockerfile --platform linux/amd64 -t $(SCRAPER_IMAGE) ..
 
-# true run local outside of docker: WIP
-# 	export GOOGLE_APPLICATION_CREDENTIALS=/path/to/key.json
-# 	run.py
-
-run-local: build
+run-local-docker: build
+# where do the logs go?
 	docker run --rm \
 			--env ENV=dev \
 			--name scraper-container \
 			-v ~/.gcp/nrl-data-ingest-key.json:/secrets/nrl-data-ingest-key.json \
-			-v "$$(pwd):/app" \
+ 			-v "$$(pwd)/../logs:/app/logs" \
 			-e GOOGLE_APPLICATION_CREDENTIALS=/secrets/nrl-data-ingest-key.json \
 			$(SCRAPER_IMAGE)
 
+run-local-docker-it: build
+	docker run -it --rm --entrypoint /bin/bash $(SCRAPER_IMAGE)
+
+gcloud-auth:
+	gcloud auth activate-service-account --key-file=$HOME/.gcp/nrl-deployer-key.json
+
 SCRAPER_IMAGE_TAG=$(REGION)-docker.pkg.dev/$(PROJECT)/$(DOCKER_REPO)/$(SCRAPER_IMAGE):latest
-push: build
+push: build gcloud-auth
 	docker tag $(SCRAPER_IMAGE) $(SCRAPER_IMAGE_TAG)
 	docker push $(SCRAPER_IMAGE_TAG)
 

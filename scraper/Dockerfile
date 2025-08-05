@@ -17,11 +17,17 @@ RUN python3 -m pip install poetry==${POETRY_VERSION}
 
 WORKDIR /app
 
-COPY ./pyproject.toml ./poetry.lock ./
+COPY ../README.md ../pyproject.toml ../poetry.lock ./
+
+# cached:
 RUN poetry install --no-interaction --no-ansi --no-root --only main
 
-COPY gcp.env config.py config.yaml .
-COPY utilities ./utilities/
-COPY scraper/src/ ./scraper/src/
+COPY ../gcp.env ../config.py ../config.yaml .
+COPY ../utilities ./utilities/
+COPY scraper/ ./scraper/
 
-ENTRYPOINT ["python", "-m", "scraper.src.run"]
+# install the project as a package:
+RUN poetry install --no-interaction --no-ansi --only main
+
+WORKDIR /app/scraper
+ENTRYPOINT ["poetry", "run", "python", "-m", "scraper.run"]

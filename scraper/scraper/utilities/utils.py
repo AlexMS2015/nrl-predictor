@@ -8,12 +8,14 @@ import time
 
 @logger.catch
 def get_final_url(driver, url, retries=3):
+    logger.info(f"Getting final url for: {url}")
     for i in range(retries):
         try:
             driver.get(url)
             WebDriverWait(driver, 10).until(
                 lambda d: d.execute_script("return document.readyState") == "complete"
             )
+            logger.info(f"Final url: {driver.current_url}")
             return driver.current_url
         except Exception as e:
             logger.critical(f"Cannot obtain final URL | Retry: {i} | Error: {e}")
@@ -31,20 +33,21 @@ def parse_url(url):
         year = int(query_params["season"][0])
         round_num = int(query_params["round"][0]) - 1
     except (KeyError, IndexError, ValueError) as e:
-        logger.critical("Cannot extract comp, year, round:", e)
+        logger.critical(f"Cannot extract comp, year, round: {e}")
         raise e
 
     return competition_code, year, round_num
 
 
 def save_locally(match_json, competition, year, round_num):
-    root_dir = Path(__file__).parents[2]
+    root_dir = Path(__file__).parents[3]
     data_dir = root_dir / "data" / competition / "match_data"
     data_dir = data_dir.resolve()  # convert to absolute path
     data_dir.mkdir(parents=True, exist_ok=True)
 
     file_name = f"{year}_r{round_num}.json"
     file_path = data_dir / file_name
+    logger.info(f"Saving data to: {file_path}")
     try:
         with open(file_path, "w", encoding="utf-8") as file:
             json.dump(match_json, file, ensure_ascii=False, indent=4)

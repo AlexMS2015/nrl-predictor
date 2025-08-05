@@ -19,6 +19,12 @@ dependencies = [
     "chromedriver-autoinstaller (>=0.6.4,<0.7.0)"
 ]
 
+[tool.poetry]
+packages = [
+  {include = "scraper", from = "scraper"},
+  {include = "utilities"},
+  {include = "config.py"}
+]
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
@@ -31,7 +37,6 @@ jupyterlab = "^4.4.5"
 ipykernel = "^6.30.0"
 ipywidgets = "^8.1.7"
 pre-commit = "^4.2.0"
-
 
 [tool.ruff]
 extend-exclude = ["*.ipynb"]

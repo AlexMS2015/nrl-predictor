@@ -2,6 +2,7 @@ import sys
 import yaml
 from loguru import logger
 from pydantic import BaseModel
+from pathlib import Path
 
 
 class Config(BaseModel):
@@ -29,11 +30,13 @@ class Config(BaseModel):
         return codes_reversed.get(competition_code, None)
 
 
-with open("config.yaml", "r") as file:
+config_path = Path(__file__).parent / "config.yaml"
+with open(config_path, "r") as file:
     config_data = yaml.safe_load(file)
 
 config = Config(**config_data)
 
+logger_path = Path(__file__).parent / "logs" / "app.log"
 logger.remove()
-logger.add("app.log", level="DEBUG")
+logger.add(logger_path, level="DEBUG")
 logger.add(sys.stdout, level="INFO", enqueue=True)

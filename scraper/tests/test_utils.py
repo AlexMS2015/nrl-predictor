@@ -1,5 +1,5 @@
 import pytest
-from src.utilities.utils import parse_url
+from scraper.utilities.utils import parse_url
 
 
 class TestParseUrl:
