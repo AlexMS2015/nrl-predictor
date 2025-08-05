@@ -91,10 +91,6 @@ jobs:
     needs: [lint, test]
     runs-on: 'ubuntu-latest'
 
-    defaults:
-      run:
-        working-directory: ./scraper
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -137,24 +133,23 @@ jobs:
           registry: '${{ env.REGION }}-docker.pkg.dev'
 
       - name: 'Build and Push Container'
+        working-directory: ./scraper
         run: |-
           make scraper-build
           make scraper-push
 
       - name: 'Deploy to Cloud Run'
+        working-directory: ./scraper
         run: make scraper-deploy-dev
 
       # integration test
       - name: 'Run cloud run job'
+        working-directory: ./scraper
         run: make scraper-run-dev
 
   deploy-prod:
     if: github.ref_name == 'main'
     runs-on: 'ubuntu-latest'
-
-    defaults:
-      run:
-        working-directory: ./scraper
 
     steps:
       - name: Checkout
@@ -187,6 +182,7 @@ jobs:
           credentials_json: ${{ secrets.SVC_KEY }}
 
       - name: 'Deploy to Cloud Run'
+        working-directory: ./scraper
         run: make scraper-deploy-prod
 
       # integration test
