@@ -1,8 +1,13 @@
 include ../gcp.env
 export
 
-# should run this before any gcloud commands to simulate the GHA environment:
-# gcloud auth activate-service-account --key-file=$HOME/.gcp/nrl-deployer-key.json
+gcloud-auth:
+# 	gcloud auth application-default login
+	gcloud config set account $(USERNAME)
+
+# run this locally before push and deploy to better simulate GHA environment
+gcloud-auth-sa:
+	gcloud auth activate-service-account --key-file=$(HOME)/.gcp/nrl-deployer-key.json
 
 lint:
 	poetry run ruff check --fix
@@ -31,10 +36,6 @@ run-local-docker: build
 
 run-local-docker-it: build
 	docker run -it --rm --entrypoint /bin/bash $(SCRAPER_IMAGE)
-
-# run this locally before push and deploy to better simulate GHA environment
-gcloud-auth:
-	gcloud auth activate-service-account --key-file=$HOME/.gcp/nrl-deployer-key.json
 
 SCRAPER_IMAGE_TAG=$(REGION)-docker.pkg.dev/$(PROJECT)/$(DOCKER_REPO)/$(SCRAPER_IMAGE):latest
 push:
