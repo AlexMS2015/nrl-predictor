@@ -22,7 +22,7 @@ COPY ../README.md ../pyproject.toml ../poetry.lock ./
 # cached:
 RUN poetry install --no-interaction --no-ansi --no-root --only main
 
-COPY ../gcp.env ../config.py ../config.yaml .
+COPY ../config.py ../config.yaml .
 COPY ../utilities ./utilities/
 COPY scraper/ ./scraper/
 

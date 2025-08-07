@@ -6,6 +6,8 @@ from pathlib import Path
 
 
 class Config(BaseModel):
+    gcs_bucket: dict[str, str]
+
     teams: list[str]
 
     nrl_website: str

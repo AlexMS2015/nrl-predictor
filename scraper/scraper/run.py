@@ -3,14 +3,14 @@ Script to run the data scraper for match and player data.
 """
 
 import os
-from dotenv import load_dotenv
+
+# from dotenv import load_dotenv
 from loguru import logger
 from config import config as conf
 from utilities.gcs_client import GCSClient
 from scraper.utilities.scraper_functions import get_basic_match_data
 from scraper.utilities.set_up_driver import set_up_driver
 from scraper.utilities.utils import get_final_url, parse_url, save_locally
-from pathlib import Path
 
 
 def main(gcs_bucket):
@@ -27,12 +27,8 @@ def main(gcs_bucket):
 
 
 if __name__ == "__main__":
-    env_path = Path(__file__).parents[2] / "gcp.env"
-    load_dotenv(env_path)
     env = os.getenv("ENV", "dev")
-    gcs_bucket = os.getenv("DEV_BUCKET")
-    if env == "prod":
-        gcs_bucket = os.getenv("PROD_BUCKET")
+    gcs_bucket = conf.gcs_bucket[env]
     logger.info(f"Set GCS bucket to: {gcs_bucket}")
 
     main(gcs_bucket)

@@ -1,6 +1,6 @@
-# gcs_bucket:
-#   dev: nrl-data-dev
-#   prod: nrl-data-prod
+gcs_bucket:
+  dev: nrl-data-dev
+  prod: nrl-data-prod
 
 teams:
   - Broncos
