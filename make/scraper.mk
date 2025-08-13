@@ -52,7 +52,7 @@ schedule-dev:
 	--oauth-service-account-email $(SVC_EMAIL)
 
 run-dev:
-	gcloud run jobs execute nrl-dev --wait --region $(REGION)
+	gcloud run jobs execute $(SCRAPER_JOB_DEV) --wait --region $(REGION)
 
 deploy-prod:
 	gcloud run jobs deploy $(SCRAPER_JOB_PROD) \
@@ -71,4 +71,4 @@ schedule-prod:
 	--oauth-service-account-email $(SVC_EMAIL)
 
 run-prod:
-	gcloud run jobs execute nrl-prod --wait --region $(REGION)
+	gcloud run jobs execute $(SCRAPER_JOB_PROD) --wait --region $(REGION)
