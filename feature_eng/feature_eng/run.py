@@ -46,3 +46,15 @@ if __name__ == "__main__":
     gcs_bucket = conf.gcs_bucket[env]
     logger.info(f"Set GCS bucket to: {gcs_bucket}")
     main(gcs_bucket, conf.feature_pipeline)
+
+    # parser = argparse.ArgumentParser()
+    # parser.add_argument("--dry-run", action="store_true")
+    # args = parser.parse_args()
+
+    # if args.dry_run:
+    #     logger.debug("Dry run")
+    # else:
+    #     env = os.getenv("ENV", "dev")
+    #     gcs_bucket = conf.gcs_bucket[env]
+    #     logger.info(f"Set GCS bucket to: {gcs_bucket}")
+    #     main(gcs_bucket)

@@ -3,6 +3,7 @@ Script to run the data scraper for match and player data.
 """
 
 import os
+import argparse
 from loguru import logger
 from config import config as conf
 from utilities.gcs_client import GCSClient
@@ -25,8 +26,14 @@ def main(gcs_bucket):
 
 
 if __name__ == "__main__":
-    env = os.getenv("ENV", "dev")
-    gcs_bucket = conf.gcs_bucket[env]
-    logger.info(f"Set GCS bucket to: {gcs_bucket}")
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--dry-run", action="store_true")
+    args = parser.parse_args()
 
-    main(gcs_bucket)
+    if args.dry_run:
+        logger.debug("Dry run")
+    else:
+        env = os.getenv("ENV", "dev")
+        gcs_bucket = conf.gcs_bucket[env]
+        logger.info(f"Set GCS bucket to: {gcs_bucket}")
+        main(gcs_bucket)

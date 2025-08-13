@@ -25,6 +25,7 @@ RUN poetry install --no-interaction --no-ansi --no-root --only main
 COPY config.py config.yaml .
 COPY ./utilities ./utilities/
 COPY ./scraper/ ./scraper/
+COPY ./feature_eng/ ./feature_eng/
 
 # install the project as a package:
 RUN poetry install --no-interaction --no-ansi --only main

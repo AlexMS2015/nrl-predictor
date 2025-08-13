@@ -27,6 +27,7 @@ dependencies = [
 [tool.poetry]
 packages = [
   {include = "scraper", from = "scraper"},
+  {include = "feature_eng", from="feature_eng"},
   {include = "utilities"},
   {include = "config.py"}
 ]

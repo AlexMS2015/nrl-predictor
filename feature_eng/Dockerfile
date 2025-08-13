@@ -14,8 +14,9 @@ COPY README.md pyproject.toml poetry.lock .
 # cached:
 RUN poetry install --no-interaction --no-ansi --no-root --only main
 
-COPY .config.py config.yaml .
+COPY config.py config.yaml .
 COPY ./utilities ./utilities/
+COPY ./scraper/ ./scraper/
 COPY ./feature_eng/ ./feature_eng/
 
 # install the project as a package:
