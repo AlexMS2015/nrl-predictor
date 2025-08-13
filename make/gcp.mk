@@ -66,7 +66,7 @@ iam-deployer: # deployer SA
 iam-cloud-run: # cloud run SA
 	gcloud iam service-accounts create $(RUN_SVC_ACCT) \
 		--description="Service account for NRL data ingestion" \
-		--display-name="NRL Data Ingest Service Account"
+		--display-name="NRL Cloud Run Service Account"
 
 	gcloud iam service-accounts keys create ~/.gcp/$(RUN_SVC_ACCT)-key.json \
 		--iam-account=$(RUN_SVC_EMAIL)
