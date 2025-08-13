@@ -1,16 +1,7 @@
 name: 'Build and deploy scraper'
 
 on:
-  pull_request:
-    branches:
-      - 'main'
-    paths:
-      - 'scraper/**'
-  push:
-    branches:
-      - 'main'
-    paths:
-      - 'scraper/**'
+  workflow_call:
 
 jobs:
   lint:
