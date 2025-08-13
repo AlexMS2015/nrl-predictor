@@ -14,7 +14,7 @@ run-local: lint unit-test
 build:
 	docker buildx build -f feature_eng/Dockerfile --platform linux/amd64 -t $(FEATENG_IMAGE) .
 
-run-local-docker: build
+run-docker: build
 	docker run --rm \
 			--env ENV=dev \
 			--name feateng-container \
@@ -23,8 +23,14 @@ run-local-docker: build
 			-e GOOGLE_APPLICATION_CREDENTIALS=/secrets/$(RUN_SVC_ACCT)-key.json \
 			$(FEATENG_IMAGE)
 
-run-local-docker-it: build
+run-docker-it: build
 	docker run -it --rm --entrypoint /bin/bash $(FEATENG_IMAGE)
+
+run-docker-dryrun: build
+	docker run --rm \
+ 			-v "$$(pwd)/../logs:/app/logs" \
+			$(FEATENG_IMAGE) \
+			--dry-run
 
 
 ######################################

@@ -1,5 +1,6 @@
 import os
 import re
+import argparse
 from loguru import logger
 from config import config as conf
 import pandas as pd
@@ -42,19 +43,14 @@ def main(gcs_bucket, queries):
 
 
 if __name__ == "__main__":
-    env = os.getenv("ENV", "dev")
-    gcs_bucket = conf.gcs_bucket[env]
-    logger.info(f"Set GCS bucket to: {gcs_bucket}")
-    main(gcs_bucket, conf.feature_pipeline)
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--dry-run", action="store_true")
+    args = parser.parse_args()
 
-    # parser = argparse.ArgumentParser()
-    # parser.add_argument("--dry-run", action="store_true")
-    # args = parser.parse_args()
-
-    # if args.dry_run:
-    #     logger.debug("Dry run")
-    # else:
-    #     env = os.getenv("ENV", "dev")
-    #     gcs_bucket = conf.gcs_bucket[env]
-    #     logger.info(f"Set GCS bucket to: {gcs_bucket}")
-    #     main(gcs_bucket)
+    if args.dry_run:
+        logger.debug("Dry run")
+    else:
+        env = os.getenv("ENV", "dev")
+        gcs_bucket = conf.gcs_bucket[env]
+        logger.info(f"Set GCS bucket to: {gcs_bucket}")
+        main(gcs_bucket, conf.feature_pipeline)
