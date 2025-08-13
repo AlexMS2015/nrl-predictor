@@ -12,7 +12,7 @@ run-local: lint unit-test
 	poetry run python -m scraper.scraper.run
 
 build:
-	docker buildx build -f ../scraper/Dockerfile --platform linux/amd64 -t $(SCRAPER_IMAGE) .
+	docker buildx build -f scraper/Dockerfile --platform linux/amd64 -t $(SCRAPER_IMAGE) .
 
 run-local-docker: build
 	docker run --rm \
