@@ -36,7 +36,7 @@ deploy-dev:
 		--image $(SCRAPER_IMAGE_TAG) \
 		--region $(REGION) \
 		--memory 4Gi
-		--service-account $(SCRAPER_SVC_EMAIL) \
+		--service-account $(RUN_SVC_EMAIL) \
 		--set-env-vars ENV=dev
 
 schedule-dev:
@@ -55,7 +55,7 @@ deploy-prod:
 		--image $(SCRAPER_IMAGE_TAG) \
 		--region $(REGION) \
 		--memory 4Gi
-		--service-account $(SCRAPER_SVC_EMAIL) \
+		--service-account $(RUN_SVC_EMAIL) \
 		--set-env-vars ENV=prod
 
 schedule-prod:
