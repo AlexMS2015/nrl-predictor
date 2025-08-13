@@ -31,7 +31,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.dry_run:
-        logger.debug("Dry run")
+        logger.debug("Scraper dry run")
     else:
         env = os.getenv("ENV", "dev")
         gcs_bucket = conf.gcs_bucket[env]
