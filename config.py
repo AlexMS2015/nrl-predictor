@@ -7,25 +7,8 @@ from pathlib import Path
 
 class Config(BaseModel):
     gcs_bucket: dict[str, str]
-
-    teams: list[str]
-
-    nrl_website: str
-    nrlw_website: str
-    hostplus_website: str
-    knockon_website: str
-
-    player_labels: list[str]
-    nrl_2024_round: int
-
-    team_colours: dict[str, str]
-    team_colours_inverse: dict[str, str]
-
-    nrlw_teams: list[str]
-    hostplus_teams: list[str]
-    knockon_teams: list[str]
-
     competition_codes: dict[str, str]
+    feature_pipeline: list[str]
 
     def comp_code_to_name(self, competition_code):
         codes_reversed = {v: k for k, v in self.competition_codes.items()}

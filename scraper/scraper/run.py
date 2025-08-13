@@ -3,8 +3,6 @@ Script to run the data scraper for match and player data.
 """
 
 import os
-
-# from dotenv import load_dotenv
 from loguru import logger
 from config import config as conf
 from utilities.gcs_client import GCSClient

@@ -1,43 +1,32 @@
-include ../gcp.env
+include ../.env
 export
 
-gcloud-auth:
-# 	gcloud auth application-default login
-	gcloud config set account $(USERNAME)
+include make/test.mk
 
-# run this locally before push and deploy to better simulate GHA environment
-gcloud-auth-sa:
-	gcloud auth activate-service-account --key-file=$(HOME)/.gcp/nrl-deployer-key.json
+######################################
+### Scraper
+######################################
 
-lint:
-	poetry run ruff check --fix
-	poetry run ruff format
-
-unit-test:
-	poetry run pytest
-
-run-local: lint test
-	poetry install
-	export GOOGLE_APPLICATION_CREDENTIALS=/path/to/key.json
-	poetry run python -m scraper.run
+run-local: lint unit-test
+# 	export GOOGLE_APPLICATION_CREDENTIALS=~/.gcp/$(RUN_SVC_ACCT)-key.json
+	poetry run python -m scraper.scraper.run
 
 build:
 	docker buildx build -f ./Dockerfile --platform linux/amd64 -t $(SCRAPER_IMAGE) ..
 
 run-local-docker: build
-# where do the logs go?
 	docker run --rm \
 			--env ENV=dev \
 			--name scraper-container \
-			-v ~/.gcp/nrl-data-ingest-key.json:/secrets/nrl-data-ingest-key.json \
+			-v ~/.gcp/nrl-data-ingest-key.json:/secrets/$(RUN_SVC_ACCT)-key.json \
  			-v "$$(pwd)/../logs:/app/logs" \
-			-e GOOGLE_APPLICATION_CREDENTIALS=/secrets/nrl-data-ingest-key.json \
+			-e GOOGLE_APPLICATION_CREDENTIALS=/secrets/$(RUN_SVC_ACCT)-key.json \
 			$(SCRAPER_IMAGE)
 
 run-local-docker-it: build
 	docker run -it --rm --entrypoint /bin/bash $(SCRAPER_IMAGE)
 
-SCRAPER_IMAGE_TAG=$(REGION)-docker.pkg.dev/$(PROJECT)/$(DOCKER_REPO)/$(SCRAPER_IMAGE):latest
+SCRAPER_IMAGE_TAG=$(REGION)-docker.pkg.dev/$(PROJECT_ID)/$(DOCKER_REPO)/$(SCRAPER_IMAGE):latest
 push:
 	docker tag $(SCRAPER_IMAGE) $(SCRAPER_IMAGE_TAG)
 	docker push $(SCRAPER_IMAGE_TAG)
@@ -54,12 +43,12 @@ schedule-dev:
 	gcloud scheduler jobs create http $(SCRAPER_SCHEDULE_NAME_DEV) \
 	--location $(REGION) \
 	--schedule="0 7 * 3-10 3" \
-	--uri="https://run.googleapis.com/v2/projects/$(PROJECT)/locations/$(REGION)/jobs/$(SCRAPER_JOB_DEV):run" \
+	--uri="https://run.googleapis.com/v2/projects/$(PROJECT_ID)/locations/$(REGION)/jobs/$(SCRAPER_JOB_DEV):run" \
 	--http-method POST \
 	--oauth-service-account-email $(SVC_EMAIL)
 
 run-dev:
-	gcloud run jobs execute nrl-scraper-dev --wait --region $(REGION)
+	gcloud run jobs execute nrl-dev --wait --region $(REGION)
 
 deploy-prod:
 	gcloud run jobs deploy $(SCRAPER_JOB_PROD) \
@@ -73,11 +62,9 @@ schedule-prod:
 	gcloud scheduler jobs create http $(SCRAPER_SCHEDULE_NAME_PROD) \
 	--location $(REGION) \
 	--schedule="0 7 * 3-10 3" \
-	--uri="https://run.googleapis.com/v2/projects/$(PROJECT)/locations/$(REGION)/jobs/$(SCRAPER_JOB_PROD):run" \
+	--uri="https://run.googleapis.com/v2/projects/$(PROJECT_ID)/locations/$(REGION)/jobs/$(SCRAPER_JOB_PROD):run" \
 	--http-method POST \
 	--oauth-service-account-email $(SVC_EMAIL)
 
 run-prod:
-	gcloud run jobs execute nrl-scraper-prod --wait --region $(REGION)
-
-# --dry-run -> can be passed to run.py to see what would be done without actually running it
+	gcloud run jobs execute nrl-prod --wait --region $(REGION)
