@@ -42,18 +42,15 @@ jobs:
           registry: '${{ env.REGION }}-docker.pkg.dev'
 
       - name: 'Build and Push Container'
-        working-directory: ./scraper
         run: |-
           make -f make/scraper.mk build
           make -f make/scraper.mk push
 
       - name: 'Deploy to Cloud Run'
-        working-directory: ./scraper
         run: make -f make/scraper.mk deploy-dev
 
       # integration test
       - name: 'Run cloud run job'
-        working-directory: ./scraper
         run: make -f make/scraper.mk run-dev
 
   deploy-prod:
@@ -71,10 +68,8 @@ jobs:
           credentials_json: ${{ secrets.SVC_KEY }}
 
       - name: 'Deploy to Cloud Run'
-        working-directory: ./scraper
         run: make -f make/scraper.mk deploy-prod
 
       # integration test
       - name: 'Run cloud run job'
-        working-directory: ./scraper
         run: make -f make/scraper.mk run-prod
