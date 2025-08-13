@@ -29,7 +29,7 @@ run-docker-it: build
 run-docker-dryrun: build
 	docker run --rm \
  			-v "$$(pwd)/../logs:/app/logs" \
-			$(SCRAPER_IMAGE)
+			$(SCRAPER_IMAGE) \
 			--dry-run
 
 ######################################
