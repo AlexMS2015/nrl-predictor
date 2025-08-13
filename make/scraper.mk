@@ -4,7 +4,7 @@ export
 include make/test.mk
 
 ######################################
-### Scraper
+### Local
 ######################################
 
 run-local: lint unit-test
@@ -26,6 +26,10 @@ run-local-docker: build
 run-local-docker-it: build
 	docker run -it --rm --entrypoint /bin/bash $(SCRAPER_IMAGE)
 
+######################################
+### Cloud
+######################################
+
 SCRAPER_IMAGE_TAG=$(REGION)-docker.pkg.dev/$(PROJECT_ID)/$(DOCKER_REPO)/$(SCRAPER_IMAGE):latest
 push:
 	docker tag $(SCRAPER_IMAGE) $(SCRAPER_IMAGE_TAG)
@@ -35,7 +39,7 @@ deploy-dev:
 	gcloud run jobs deploy $(SCRAPER_JOB_DEV) \
 		--image $(SCRAPER_IMAGE_TAG) \
 		--region $(REGION) \
-		--memory 4Gi
+		--memory 4Gi \
 		--service-account $(RUN_SVC_EMAIL) \
 		--set-env-vars ENV=dev
 
@@ -54,7 +58,7 @@ deploy-prod:
 	gcloud run jobs deploy $(SCRAPER_JOB_PROD) \
 		--image $(SCRAPER_IMAGE_TAG) \
 		--region $(REGION) \
-		--memory 4Gi
+		--memory 4Gi \
 		--service-account $(RUN_SVC_EMAIL) \
 		--set-env-vars ENV=prod
 

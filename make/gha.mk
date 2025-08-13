@@ -1,10 +1,6 @@
 include .env
 export
 
-######################################
-### GHA setup
-######################################
-
 setup-gh-cli:
 	brew install gh
 	gh auth-login

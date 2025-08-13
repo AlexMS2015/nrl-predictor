@@ -4,7 +4,7 @@ export
 include make/test.mk
 
 ######################################
-### Feature engineering
+### Local
 ######################################
 
 run-local: lint unit-test
@@ -12,7 +12,7 @@ run-local: lint unit-test
 	poetry run python -m feature_eng.feature_eng.run
 
 build:
-	docker buildx build -f feat_eng/Dockerfile --platform linux/amd64 -t $(FEATENG_IMAGE) .
+	docker buildx build -f feature_eng/Dockerfile --platform linux/amd64 -t $(FEATENG_IMAGE) .
 
 run-local-docker: build
 	docker run --rm \
@@ -26,6 +26,11 @@ run-local-docker: build
 run-local-docker-it: build
 	docker run -it --rm --entrypoint /bin/bash $(FEATENG_IMAGE)
 
+
+######################################
+### Cloud
+######################################
+
 FEATENG_IMAGE_TAG=$(REGION)-docker.pkg.dev/$(PROJECT_ID)/$(DOCKER_REPO)/$(FEATENG_IMAGE):latest
 push:
 	docker tag $(FEATENG_IMAGE) $(FEATENG_IMAGE_TAG)
@@ -35,7 +40,7 @@ deploy-dev:
 	gcloud run jobs deploy $(FEATENG_JOB_DEV) \
 		--image $(FEATENG_IMAGE_TAG) \
 		--region $(REGION) \
-		--memory 4Gi
+		--memory 4Gi \
 		--service-account $(RUN_SVC_EMAIL) \
 		--set-env-vars ENV=dev
 
@@ -54,7 +59,7 @@ deploy-prod:
 	gcloud run jobs deploy $(FEATENG_JOB_PROD) \
 		--image $(FEATENG_IMAGE_TAG) \
 		--region $(REGION) \
-		--memory 4Gi
+		--memory 4Gi \
 		--service-account $(RUN_SVC_EMAIL) \
 		--set-env-vars ENV=prod
 

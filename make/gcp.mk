@@ -2,7 +2,7 @@ include .env
 export
 
 ########################################
-# GCP setup
+# General GCP setup
 ########################################
 
 create-project:
@@ -47,6 +47,7 @@ iam-deployer: # deployer SA
 	gcloud iam service-accounts add-iam-policy-binding $(RUN_SVC_EMAIL) \
 		--member="serviceAccount:$(SVC_EMAIL)" \
 		--role="roles/iam.serviceAccountUser"
+
 	gcloud iam service-accounts add-iam-policy-binding $(SVC_EMAIL) \
 		--member="serviceAccount:$(SVC_EMAIL)" \
 		--role="roles/iam.serviceAccountUser"
