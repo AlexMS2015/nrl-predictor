@@ -23,4 +23,4 @@ repos:
       entry: ./scraper/tests/docker_smoke_test.sh
       language: script
       files: ^(scraper/)
-      stages: [push]
+      stages: [pre-push]
