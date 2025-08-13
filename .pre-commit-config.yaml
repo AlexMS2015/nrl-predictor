@@ -24,3 +24,11 @@ repos:
       language: script
       files: ^(scraper/)
       stages: [pre-push]
+- repo: local
+  hooks:
+    - id: feature-eng-smoke-test
+      name: Feature eng dry run for Docker
+      entry: ./feature_eng/tests/docker_smoke_test.sh
+      language: script
+      files: ^(feature_eng/)
+      stages: [pre-push]
