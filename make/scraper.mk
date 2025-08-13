@@ -1,14 +1,11 @@
+# scraper cloud run job
+
 include .env
 export
 
-include make/test.mk
-
-run-local: lint unit-test
-# 	export GOOGLE_APPLICATION_CREDENTIALS=~/.gcp/$(RUN_SVC_ACCT)-key.json
-	poetry run python -m scraper.run
-
+SERVICE=$(SCRAPER_SERVICE)
 IMAGE=$(SCRAPER_IMAGE)
-CONTAINER_NAME=scraper-container
+CONTAINER_NAME=$(SCRAPER_SERVICE)-container
 JOB_DEV=$(SCRAPER_JOB_DEV)
 JOB_PROD=$(SCRAPER_JOB_PROD)
 SCHEDULE_NAME_DEV=$(SCRAPER_SCHEDULE_NAME_DEV)

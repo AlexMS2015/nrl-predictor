@@ -4,7 +4,7 @@ export
 include make/test.mk
 
 build:
-	docker buildx build -f feature_eng/Dockerfile --platform linux/amd64 -t $(IMAGE) .
+	docker buildx build -f $(SERVICE)/Dockerfile --platform linux/amd64 -t $(IMAGE) .
 
 ######################################
 ### Local

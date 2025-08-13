@@ -13,7 +13,10 @@ def load_match_data(bucket, blobs):
     year = -1
     for blob in blobs:
         match = re.search(r"nrl/match_data/(\d{4})_r(\d+)\.json", blob.name)
-        df = pd.read_json(f"gs://{bucket}/{blob.name}")
+        try:
+            df = pd.read_json(f"gs://{bucket}/{blob.name}")
+        except Exception as e:
+            logger.info(f"Failed to load blob: {blob.name} | Error: {e}")
         df["year"] = int(match.group(1))
         df["round_num"] = int(match.group(2))
         dfs.append(df)
