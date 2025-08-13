@@ -1,12 +1,12 @@
-include ../.env
+include .env
 export
 
 include make/gcp.mk
 include make/gha.mk
 
-setup: setup-local-env
+setup: setup-local-env gcp-setup # setup-gha
 
-setup-local-env: gcp-setup setup-gha
+setup-local-env:
 	poetry install
 	pre-commit install
 
@@ -17,7 +17,7 @@ gcp-setup: create-project \
 		iam-cloud-run \
 		iam-deployer
 
-setup-gha: setup-gh-cli add-secrets-gh
+# setup-gha: setup-gh-cli add-secrets-gh
 
 ######################################
 ### Auth
