@@ -22,4 +22,4 @@ COPY ./feature_eng/ ./feature_eng/
 # install the project as a package:
 RUN poetry install --no-interaction --no-ansi --only main
 
-ENTRYPOINT ["poetry", "run", "python", "-m", "feature_eng.feature_eng.run"]
+ENTRYPOINT ["poetry", "run", "python", "-m", "feature_eng.run"]

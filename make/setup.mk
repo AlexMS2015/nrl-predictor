@@ -9,6 +9,7 @@ setup: setup-local-env gcp-setup # setup-gha
 setup-local-env:
 	poetry install
 	pre-commit install
+	pre-commit install --hook-type pre-push
 
 gcp-setup: create-project \
 		set-project \

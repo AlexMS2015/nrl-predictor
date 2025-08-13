@@ -30,4 +30,4 @@ COPY ./feature_eng/ ./feature_eng/
 # install the project as a package:
 RUN poetry install --no-interaction --no-ansi --only main
 
-ENTRYPOINT ["poetry", "run", "python", "-m", "scraper.scraper.run"]
+ENTRYPOINT ["poetry", "run", "python", "-m", "scraper.run"]
