@@ -42,7 +42,7 @@ def main(gcs_bucket, competition, queries):
 
     logger.info("Saving training data to CSV")
     train_df = duckdb.sql("SELECT * FROM train").df()
-    train_df.to_csv("./data/train_df.csv", index=False)
+    # train_df.to_csv("./data/train_df.csv", index=False)
     train_df.to_csv(f"gs://{gcs_bucket}/training/train_df.csv", index=False)
 
 
