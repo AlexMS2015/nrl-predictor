@@ -5,13 +5,14 @@ from loguru import logger
 from config import config as conf
 import pandas as pd
 import duckdb
-from utilities.gcs_client import GCSClient
+from utilities.gcs_client import gcs_client
 
 
-def load_match_data(bucket, blobs):
+def load_match_data(blobs, bucket="nrl-data-dev"):
     dfs = []
     year = -1
     for blob in blobs:
+        # REMOVE NRL AND MATCH_DATA FROM THIS:
         match = re.search(r"nrl/match_data/(\d{4})_r(\d+)\.json", blob.name)
         try:
             df = pd.read_json(f"gs://{bucket}/{blob.name}")
@@ -27,11 +28,13 @@ def load_match_data(bucket, blobs):
     return df
 
 
-def main(gcs_bucket, competition, queries):
-    gcs_client = GCSClient(bucket_name=gcs_bucket)
+def main(competition, queries, local_run):
     logger.info("Loading match data from GCS JSON")
     sub_folder = f"{competition}/{conf.blobs['match']}"
-    df = load_match_data(bucket=gcs_bucket, blobs=gcs_client.get_blobs(sub_folder))  # noqa: F841
+    blobs = gcs_client.get_blobs(sub_folder)
+    if local_run:
+        blobs = [blob for blob in blobs][:2]
+    df = load_match_data(blobs=blobs)  # noqa: F841
 
     logger.info("Running feature eng queries")
     for query in queries:
@@ -42,20 +45,23 @@ def main(gcs_bucket, competition, queries):
 
     logger.info("Saving training data to CSV")
     train_df = duckdb.sql("SELECT * FROM train").df()
-    # train_df.to_csv("./data/train_df.csv", index=False)
-    train_df.to_csv(f"gs://{gcs_bucket}/training/train_df.csv", index=False)
+    os.makedirs("./data", exist_ok=True)
+    train_df.to_csv("./data/train_df.csv", index=False)
+    # train_df.to_csv(f"gs://{gcs_bucket}/training/train_df.csv", index=False)
+    gcs_client.upload_to_gcs(
+        src_file="./data/train_df.csv",
+        dest_blob=f"{competition}/train/train_df.csv",
+    )
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument("--local-run", action="store_true")
     args = parser.parse_args()
 
     if args.dry_run:
         logger.debug("Feature engineering dry run")
     else:
-        env = os.getenv("ENV", "dev")
-        gcs_bucket = conf.gcs_bucket[env]
-        logger.info(f"Set GCS bucket to: {gcs_bucket}")
         competition = conf.comp_code_to_name("111")
-        main(gcs_bucket, competition, conf.feature_pipeline)
+        main(competition, conf.feature_pipeline, local_run=args.local_run)
