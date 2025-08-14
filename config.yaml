@@ -1,4 +1,4 @@
-gcs_buckets:
+buckets:
   dev: nrl-data-dev
   prod: nrl-data-prod
 

@@ -1,15 +1,15 @@
+import os
+import json
+import time
+import requests
+from loguru import logger
+from config import conf
+from bs4 import BeautifulSoup
+from urllib.parse import urlparse, parse_qs
 import chromedriver_autoinstaller
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
-import os
-import requests
-from bs4 import BeautifulSoup
-from loguru import logger
-from urllib.parse import urlparse, parse_qs
 from selenium.webdriver.support.ui import WebDriverWait
-import json
-import time
-from config import conf
 
 
 class NRLDataScraper:

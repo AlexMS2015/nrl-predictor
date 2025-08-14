@@ -1,6 +1,5 @@
 from google.cloud import storage
 from loguru import logger
-from config import conf
 
 
 class GCSClient:
@@ -10,9 +9,9 @@ class GCSClient:
     Provides methods to upload and download files to and from a specified GCS bucket.
     """
 
-    def __init__(self, bucket_name: str):
+    def __init__(self, bucket: str):
         self.client = storage.Client(project="nrl-predictor-463403")
-        self.bucket = self.client.bucket(bucket_name)
+        self.bucket = self.client.bucket(bucket)
 
     def upload_to_gcs(self, src_file: str, dest_blob: str) -> None:
         """Uploads a file to Google Cloud Storage."""
@@ -28,7 +27,3 @@ class GCSClient:
 
     def get_blobs(self, prefix):
         return self.client.list_blobs(self.bucket, prefix=prefix)
-
-
-logger.info(f"Setting up GCS client for env: {conf.env}")
-gcs_client = GCSClient(bucket_name=conf.gcs_bucket)

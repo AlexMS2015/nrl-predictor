@@ -4,8 +4,7 @@ Script to run the data scraper for match and player data.
 
 import argparse
 from loguru import logger
-from config import paths
-from utilities.gcs_client import gcs_client
+from config import conf
 from scraper.nrl_data_scraper import NRLDataScraper
 import json
 
@@ -23,12 +22,12 @@ def main(competition_code, round=None, year=None):
     scraper = NRLDataScraper(competition_code=competition_code, round=round, year=year)
     match_json = scraper.get_basic_match_data()
 
-    file_name = paths.match_filename(scraper.round, scraper.year)
-    blob_path = paths.blob_path(scraper.competition, "match", file_name)
-    local_path = paths.local_path(blob_path)
+    file_name = conf.paths.match_filename(scraper.round, scraper.year)
+    blob_path = conf.paths.blob_path(scraper.competition, "match", file_name)
+    local_path = conf.paths.local_path(blob_path)
 
     save_locally(local_path, match_json)
-    gcs_client.upload_to_gcs(
+    conf.gcs_client.upload_to_gcs(
         src_file=local_path,
         dest_blob=blob_path,
     )

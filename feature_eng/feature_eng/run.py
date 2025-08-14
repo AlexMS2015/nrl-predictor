@@ -1,7 +1,6 @@
 import argparse
 from loguru import logger
-from config import conf, paths
-from utilities.gcs_client import gcs_client
+from config import conf
 import pandas as pd
 import duckdb
 
@@ -24,8 +23,8 @@ def load_match_data(blobs, bucket="nrl-data-dev"):
 
 def main(competition, queries, local_run):
     logger.info("Loading match data from GCS JSON")
-    blob = paths.blob_path(competition, "match")
-    blobs = gcs_client.get_blobs(blob)
+    blob = conf.paths.blob_path(competition, "match")
+    blobs = conf.gcs_client.get_blobs(blob)
     if local_run:
         blobs = [blob for blob in blobs][:2]
     df = load_match_data(blobs=blobs)  # noqa: F841
@@ -40,10 +39,10 @@ def main(competition, queries, local_run):
     logger.info("Saving training data to CSV")
     train_df = duckdb.sql("SELECT * FROM train").df()
     file_name = "train_df.csv"
-    blob_path = paths.blob_path("training", file_name)
-    local_path = paths.local_path(blob_path)
+    blob_path = conf.paths.blob_path("training", file_name)
+    local_path = conf.paths.local_path(blob_path)
     train_df.to_csv(local_path, index=False)
-    gcs_client.upload_to_gcs(
+    conf.gcs_client.upload_to_gcs(
         src_file=local_path,
         dest_blob=blob_path,
     )
