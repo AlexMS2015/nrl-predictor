@@ -2,7 +2,14 @@ gcs_bucket:
   dev: nrl-data-dev
   prod: nrl-data-prod
 
-competition_codes:
+blobs:
+  match: match_data
+
+links:
+  main: https://www.nrl.com
+  draw: draw
+
+competition_code_map:
   nrl: '111'
   nrlw: '161'
   knockon: '113'

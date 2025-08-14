@@ -27,10 +27,11 @@ def load_match_data(bucket, blobs):
     return df
 
 
-def main(gcs_bucket, queries):
+def main(gcs_bucket, competition, queries):
     gcs_client = GCSClient(bucket_name=gcs_bucket)
     logger.info("Loading match data from GCS JSON")
-    df = load_match_data(bucket=gcs_bucket, blobs=gcs_client.get_blobs())  # noqa: F841
+    sub_folder = f"{competition}/{conf.blobs['match']}"
+    df = load_match_data(bucket=gcs_bucket, blobs=gcs_client.get_blobs(sub_folder))  # noqa: F841
 
     logger.info("Running feature eng queries")
     for query in queries:
@@ -56,4 +57,5 @@ if __name__ == "__main__":
         env = os.getenv("ENV", "dev")
         gcs_bucket = conf.gcs_bucket[env]
         logger.info(f"Set GCS bucket to: {gcs_bucket}")
-        main(gcs_bucket, conf.feature_pipeline)
+        competition = conf.comp_code_to_name("111")
+        main(gcs_bucket, competition, conf.feature_pipeline)
