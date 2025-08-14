@@ -1,7 +1,7 @@
 import os
 import argparse
 from loguru import logger
-from config import config as conf
+from config import conf
 import pandas as pd
 import duckdb
 from utilities.gcs_client import gcs_client

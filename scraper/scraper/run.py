@@ -19,8 +19,8 @@ def save_locally(path, data_json):
         logger.warning(f"Error writing file: {e}")
 
 
-def main(competition_code):
-    scraper = NRLDataScraper(competition_code=competition_code)
+def main(competition_code, round=None, year=None):
+    scraper = NRLDataScraper(competition_code=competition_code, round=round, year=year)
     match_json = scraper.get_basic_match_data()
 
     file_name = paths.match_filename(scraper.round, scraper.year)
