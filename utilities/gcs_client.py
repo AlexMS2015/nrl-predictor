@@ -1,7 +1,6 @@
 from google.cloud import storage
 from loguru import logger
-from config import config
-import os
+from config import conf
 
 
 class GCSClient:
@@ -31,7 +30,5 @@ class GCSClient:
         return self.client.list_blobs(self.bucket, prefix=prefix)
 
 
-env = os.getenv("ENV", "dev")
-bucket_name = config.gcs_bucket["dev"]
-logger.info(f"Setting up GCS client for env: {env}")
-gcs_client = GCSClient(bucket_name=bucket_name)
+logger.info(f"Setting up GCS client for env: {conf.env}")
+gcs_client = GCSClient(bucket_name=conf.gcs_bucket)

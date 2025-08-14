@@ -4,24 +4,33 @@ Script to run the data scraper for match and player data.
 
 import argparse
 from loguru import logger
-from config import config as conf
+from config import paths
 from utilities.gcs_client import gcs_client
-from scraper.utilities.scraper_functions import get_basic_match_data
-from scraper.utilities.set_up_driver import set_up_driver
-from scraper.utilities.utils import get_final_url, parse_url, save_locally
+from scraper.nrl_data_scraper import NRLDataScraper
+import json
+
+
+def save_locally(path, data_json):
+    logger.info(f"Saving data to: {path}")
+    try:
+        with open(path, "w", encoding="utf-8") as file:
+            json.dump(data_json, file, ensure_ascii=False, indent=4)
+    except Exception as e:
+        logger.warning(f"Error writing file: {e}")
 
 
 def main(competition_code):
-    driver = set_up_driver()
-    next_round_url = get_final_url(driver, conf.draw_link(competition_code))
-    competition_code, year, round_num = parse_url(next_round_url)
-    competition = conf.comp_code_to_name(competition_code)
-    match_json = get_basic_match_data(round_num, year, competition_code)
+    scraper = NRLDataScraper(competition_code=competition_code)
+    match_json = scraper.get_basic_match_data()
 
-    file_path, file_name = save_locally(match_json, competition, year, round_num)
+    file_name = paths.match_filename(scraper.round, scraper.year)
+    blob_path = paths.blob_path(scraper.competition, "match", file_name)
+    local_path = paths.local_path(blob_path)
+
+    save_locally(local_path, match_json)
     gcs_client.upload_to_gcs(
-        src_file=str(file_path),
-        dest_blob=f"{competition}/{conf.blobs['match']}/{file_name}",
+        src_file=str(local_path),
+        dest_blob=blob_path,
     )
 
 

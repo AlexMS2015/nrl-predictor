@@ -1,5 +1,4 @@
 import os
-import re
 import argparse
 from loguru import logger
 from config import config as conf
@@ -13,16 +12,16 @@ def load_match_data(blobs, bucket="nrl-data-dev"):
     year = -1
     for blob in blobs:
         # REMOVE NRL AND MATCH_DATA FROM THIS:
-        match = re.search(r"nrl/match_data/(\d{4})_r(\d+)\.json", blob.name)
+        # match = re.search(r"nrl/match_data/(\d{4})_r(\d+)\.json", blob.name)
         try:
             df = pd.read_json(f"gs://{bucket}/{blob.name}")
         except Exception as e:
             logger.info(f"Failed to load blob: {blob.name} | Error: {e}")
-        df["year"] = int(match.group(1))
-        df["round_num"] = int(match.group(2))
+        # df["year"] = int(match.group(1))
+        # df["round_num"] = int(match.group(2))
         dfs.append(df)
-        if year != int(match.group(1)):
-            year = int(match.group(1))
+        if year != df.year[0]:
+            year = df.year[0]
             logger.info(f"Loading {year}")
     df = pd.concat(dfs, axis=0, ignore_index=True)
     return df
