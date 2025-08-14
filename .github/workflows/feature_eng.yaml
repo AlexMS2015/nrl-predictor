@@ -1,0 +1,75 @@
+name: 'Build and deploy feature engineering'
+
+on:
+  pull_request:
+    branches:
+      - 'main'
+    paths:
+      - 'feature_eng/**'
+  push:
+    branches:
+      - 'main'
+    paths:
+      - 'feature_eng/**'
+
+jobs:
+  lint-test:
+    uses: ./.github/workflows/lint_test.yaml
+
+  build-deploy-dev:
+    if: github.event_name == 'pull_request'
+    needs: lint-test
+    runs-on: 'ubuntu-latest'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: 'Import env file'
+        run: grep -v '^\s*#' .env | grep -v '^\s*$' >> ${GITHUB_ENV}
+
+      - name: Authenticate to GCP
+        id: auth
+        uses: 'google-github-actions/auth@f112390a2df9932162083945e46d439060d66ec2' # google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.SVC_KEY }}
+
+      - name: 'Docker Auth'
+        uses: 'docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567' # docker/login-action@v3
+        with:
+          username: _json_key
+          password: ${{ secrets.SVC_KEY }}
+          registry: '${{ env.REGION }}-docker.pkg.dev'
+
+      - name: 'Build and Push Container'
+        run: |-
+          make -f make/feature_eng.mk build
+          make -f make/feature_eng.mk push
+
+      - name: 'Deploy to Cloud Run'
+        run: make -f make/feature_eng.mk deploy-dev
+
+      # integration test
+      - name: 'Run cloud run job'
+        run: make -f make/feature_eng.mk run-dev
+
+  deploy-prod:
+    if: github.event_name == 'push' && github.ref_name == 'main'
+    runs-on: 'ubuntu-latest'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Authenticate to GCP
+        id: auth
+        uses: 'google-github-actions/auth@f112390a2df9932162083945e46d439060d66ec2' # google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.SVC_KEY }}
+
+      - name: 'Deploy to Cloud Run'
+        run: make -f make/feature_eng.mk deploy-prod
+
+      # integration test
+      - name: 'Run cloud run job'
+        run: make -f make/feature_eng.mk run-prod

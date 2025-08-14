@@ -1,12 +1,12 @@
 repos:
--   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
-    hooks:
-      - id: check-added-large-files
-        args: [--enforce-all]
-      - id: check-yaml
-      - id: end-of-file-fixer
-      - id: trailing-whitespace
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v5.0.0
+  hooks:
+    - id: check-added-large-files
+      args: [--enforce-all]
+    - id: check-yaml
+    - id: end-of-file-fixer
+    - id: trailing-whitespace
 - repo: https://github.com/astral-sh/ruff-pre-commit
   # Ruff version.
   rev: v0.12.5
@@ -16,3 +16,19 @@ repos:
       args: [--fix]
     # Run the formatter.
     - id: ruff-format
+- repo: local
+  hooks:
+    - id: scraper-smoke-test
+      name: Scraper dry run for Docker
+      entry: ./scraper/tests/docker_smoke_test.sh
+      language: script
+      files: ^(scraper/)
+      stages: [pre-push]
+- repo: local
+  hooks:
+    - id: feature-eng-smoke-test
+      name: Feature eng dry run for Docker
+      entry: ./feature_eng/tests/docker_smoke_test.sh
+      language: script
+      files: ^(feature_eng/)
+      stages: [pre-push]

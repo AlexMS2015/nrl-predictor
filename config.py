@@ -6,27 +6,21 @@ from pathlib import Path
 
 
 class Config(BaseModel):
-    teams: list[str]
+    gcs_bucket: dict[str, str]
+    blobs: dict[str, str]
+    links: dict[str, str]
+    competition_code_map: dict[str, str]
+    feature_pipeline: list[str]
 
-    nrl_website: str
-    nrlw_website: str
-    hostplus_website: str
-    knockon_website: str
+    @property
+    def competition_codes(self):
+        return self.competition_code_map.values()
 
-    player_labels: list[str]
-    nrl_2024_round: int
-
-    team_colours: dict[str, str]
-    team_colours_inverse: dict[str, str]
-
-    nrlw_teams: list[str]
-    hostplus_teams: list[str]
-    knockon_teams: list[str]
-
-    competition_codes: dict[str, str]
+    def draw_link(self, competition_code):
+        return f"{self.links['main']}/{self.links['draw']}/?{competition_code}"
 
     def comp_code_to_name(self, competition_code):
-        codes_reversed = {v: k for k, v in self.competition_codes.items()}
+        codes_reversed = {v: k for k, v in self.competition_code_map.items()}
         return codes_reversed.get(competition_code, None)
 
 

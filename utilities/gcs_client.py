@@ -24,3 +24,6 @@ class GCSClient:
         blob = self.bucket.blob(src_blob)
         logger.info(f"Downloading from {blob}")
         blob.download_to_filename(dest_file)
+
+    def get_blobs(self, prefix):
+        return self.client.list_blobs(self.bucket, prefix=prefix)
