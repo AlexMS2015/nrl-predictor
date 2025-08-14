@@ -29,7 +29,7 @@ def main(competition_code, round=None, year=None):
 
     save_locally(local_path, match_json)
     gcs_client.upload_to_gcs(
-        src_file=str(local_path),
+        src_file=local_path,
         dest_blob=blob_path,
     )
 

@@ -46,8 +46,8 @@ class PathBuilder:
     def match_filename(self, round_num, year):
         return f"{year}_r{round_num}.json"
 
-    def blob_path(self, competition, data_type, file_name):
-        return "/".join([competition, data_type, file_name])
+    def blob_path(self, *parts):
+        return "/".join(parts)
 
     def gcs_path(self, blob_path):
         return f"gs://{self.bucket}/{blob_path}"
@@ -55,7 +55,7 @@ class PathBuilder:
     def local_path(self, blob_path):
         local_path = self.data_dir / blob_path
         local_path.parent.mkdir(parents=True, exist_ok=True)
-        return local_path
+        return str(local_path)
 
     # ---- High-level helpers ----
     # def local_match_path(self, competition, year, round_num):

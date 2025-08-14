@@ -5,14 +5,10 @@ import os
 import requests
 from bs4 import BeautifulSoup
 from loguru import logger
-
-# import sys
-# sys.path.append("..")
 from urllib.parse import urlparse, parse_qs
 from selenium.webdriver.support.ui import WebDriverWait
 import json
 import time
-
 from config import conf
 
 
